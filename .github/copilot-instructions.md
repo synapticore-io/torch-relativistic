@@ -133,7 +133,7 @@ uv run black --check src/ tests/
 ### Naming Conventions
 
 - **Classes**: PascalCase (e.g., `RelativisticGraphConv`, `TerrellPenroseSNN`)
-- **Functions/Methods**: snake_case (e.g., `lorentz_factor`, `init_state`)
+- **Functions/Methods**: snake_case (e.g., `calculate_gamma`, `init_state`)
 - **Constants**: UPPER_SNAKE_CASE
 - **Private members**: Prefix with underscore (e.g., `_compute_boost`)
 
@@ -146,7 +146,7 @@ uv run black --check src/ tests/
 
 ### Physics-Inspired Naming
 
-- Use physics terminology accurately (e.g., `lorentz_factor`, `velocity`, `boost`)
+- Use physics terminology accurately (e.g., `calculate_gamma`, `velocity`, `boost`)
 - Parameters like `max_relative_velocity` should be in range [0, 1) representing fraction of speed of light
 - Time dilation, length contraction, and relativistic effects should follow special relativity equations
 
@@ -177,7 +177,7 @@ uv run black --check src/ tests/
 
 ### 5. Utilities (utils.py)
 
-- `lorentz_factor`: Computes γ factor from velocity
+- `calculate_gamma`: Computes γ (Lorentz) factor from velocity
 - `LeviCivitaTensor`: Four-dimensional Levi-Civita tensor for relativistic calculations
 - Helper functions for spacetime computations
 
@@ -230,11 +230,11 @@ class NewRelativisticModule(nn.Module):
 ### Using Relativistic Effects
 
 ```python
-from torch_relativistic.utils import lorentz_factor
+from torch_relativistic.utils import calculate_gamma
 
 # Compute time dilation
 velocity = 0.8  # 80% speed of light
-gamma = lorentz_factor(velocity)
+gamma = calculate_gamma(velocity)
 
 # Apply relativistic transformation
 time_dilated = time_interval * gamma
