@@ -60,24 +60,6 @@ def calculate_gamma(velocity: Tensor, eps: float = 1e-8) -> Tensor:
     return gamma
 
 
-def lorentz_factor(velocity: Tensor) -> Tensor:
-    """
-    Calculate the Lorentz factor (gamma) for a given velocity.
-
-    The Lorentz factor is a key quantity in special relativity that appears
-    in various relativistic effects like time dilation and length contraction.
-
-    Args:
-        velocity (Tensor): Velocity as a fraction of the speed of light (c)
-                           Either a scalar or vector.
-
-    Returns:
-        Tensor: Lorentz factor γ = 1/√(1-v²)
-    """
-    # Use the new calculate_gamma function for consistency
-    return calculate_gamma(velocity)
-
-
 def lorentz_contraction(length: Tensor, velocity: Tensor) -> Tensor:
     """
     Calculate the Lorentz-contracted length of an object.
@@ -92,7 +74,7 @@ def lorentz_contraction(length: Tensor, velocity: Tensor) -> Tensor:
     Returns:
         Tensor: Contracted length
     """
-    gamma = lorentz_factor(velocity)
+    gamma = calculate_gamma(velocity)
     contracted_length = length / gamma
     return contracted_length
 
@@ -111,7 +93,7 @@ def time_dilation(time: Tensor, velocity: Tensor) -> Tensor:
     Returns:
         Tensor: Dilated time
     """
-    gamma = lorentz_factor(velocity)
+    gamma = calculate_gamma(velocity)
     dilated_time = time * gamma
     return dilated_time
 
@@ -159,7 +141,7 @@ def velocity_addition(v1: Tensor, v2: Tensor) -> Tensor:
         v2_perp = v2 - v2_parallel
 
         # Apply relativistic velocity addition to parallel component
-        gamma1 = lorentz_factor(v1_mag)
+        gamma1 = calculate_gamma(v1_mag)
         v_parallel_resultant = (v2_parallel + v1) / (
             1 + torch.sum(v2_parallel * v1) / (v1_mag + 1e-8)
         )
@@ -195,7 +177,7 @@ def relativistic_doppler_factor(
     Returns:
         Tensor: Doppler factor
     """
-    gamma = lorentz_factor(velocity)
+    gamma = calculate_gamma(velocity)
 
     if observer_angle is None:
         # Assume head-on observation
@@ -287,7 +269,7 @@ def lorentz_transform_spacetime(coordinates: Tensor, velocity: Tensor) -> Tensor
     v_magnitude = torch.norm(velocity)
     v_magnitude = torch.clamp(v_magnitude, 0.0, 0.999)  # Ensure v < c
 
-    gamma = lorentz_factor(v_magnitude)
+    gamma = calculate_gamma(v_magnitude)
 
     # Normalize velocity
     v_normalized = velocity / (v_magnitude + 1e-8)
