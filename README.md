@@ -252,8 +252,10 @@ attention = RelativisticSelfAttention(
     max_velocity=0.9
 )
 
-# Optional: Create positions for spacetime distances
-positions = torch.randn(16, 24, 3)  # 3D positions for each token
+# Optional: pass per-token time indices for rotary position embeddings.
+# The attention path consumes positions as a 1D "time" per token and
+# builds rotary sin/cos frequencies from them. Shape: [batch, seq_len].
+positions = torch.arange(24).unsqueeze(0).expand(16, 24).float()
 
 # Process sequence
 output = attention(seq, positions=positions)
