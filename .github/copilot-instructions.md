@@ -43,7 +43,7 @@ torch-relativistic/
 
 ```bash
 # Clone the repository
-git clone https://github.com/bjoernbethge/torch-relativistic.git
+git clone https://github.com/synapticore-io/torch-relativistic.git
 cd torch-relativistic
 
 # Install uv package manager (if not already installed)
@@ -307,5 +307,5 @@ When contributing, keep in mind:
 
 - **Author**: Björn Bethge
 - **Email**: bjoern.bethge@gmail.com
-- **Repository**: https://github.com/bjoernbethge/torch-relativistic
+- **Repository**: https://github.com/synapticore-io/torch-relativistic
 - **PyPI**: https://pypi.org/project/torch-relativistic/

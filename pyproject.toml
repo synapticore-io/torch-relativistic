@@ -6,6 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Björn Bethge", email = "bjoern.bethge@gmail.com" }
 ]
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "torch==2.8.0",
@@ -30,9 +31,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/bjoernbethge/torch-relativistic"
-Repository = "https://github.com/bjoernbethge/torch-relativistic"
-Documentation = "https://github.com/bjoernbethge/torch-relativistic#readme"
+Homepage = "https://github.com/synapticore-io/torch-relativistic"
+Repository = "https://github.com/synapticore-io/torch-relativistic"
+Documentation = "https://github.com/synapticore-io/torch-relativistic#readme"
 
 [tool.uv]
 python-preference = "only-managed"
