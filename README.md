@@ -35,6 +35,79 @@ rather than contracted, can inspire revolutionary information processing paradig
 
 ---
 
+## 🤔 Why Relativistic? The Hypothesis
+
+The first question everyone asks when they see a module called
+`RelativisticGraphConv` is: *why would a neural network care about special
+relativity?* There is no speed of light in a social graph, a molecule, or a
+batch of token embeddings.
+
+The honest answer: **this is an inductive-bias experiment, not a physics
+simulation.** The bet is that three properties of relativistic transformations
+transfer usefully into *learned* feature spaces even when the underlying
+"space" has nothing to do with spacetime.
+
+### 1. Velocity as a learnable soft-scale knob
+
+In a classical graph convolution every neighbour contributes equally (up to
+edge weights). A learnable `velocity ∈ [0, c)` lets the network smoothly
+interpolate between
+
+- a **low-velocity regime** (`γ ≈ 1`), where the layer degenerates to a
+  standard graph conv, and
+- a **high-velocity regime** (`γ → ∞`), where information from far-away
+  nodes is effectively "time-dilated away".
+
+That is a physically-motivated, continuous **locality prior** the optimizer
+can tune *per layer*, without having to commit to a fixed receptive field up
+front. An ablation over `max_velocity` should show: at `v=0` the layer tracks
+the baseline, at moderate `v` something happens, at `v → c` the gradients
+explode (a known failure mode that's easy to detect and to clamp against).
+
+### 2. Lorentz boosts as a feature-space symmetry group
+
+Group-equivariant neural networks (rotation-equivariant CNNs, SE(3)-equivariant
+molecular models, E(3)-NNs) have repeatedly shown that **enforcing a symmetry
+of the domain as an architectural invariant acts as an extremely strong
+regularizer**. The Lorentz group is a well-studied continuous Lie group with
+a known representation theory — applying it as an equivariance constraint is
+concretely doable (`LorentzBoost` is a 4×4 matrix multiply). Whether it
+*helps* in domains that do not have an intrinsic 4-vector structure is
+exactly the open question.
+
+### 3. Terrell-Penrose as implicit augmentation
+
+Rotation-based data augmentation routinely improves CNN performance. The
+**Terrell-Penrose effect** (Terrell 1959, Penrose 1959) is the counter-intuitive
+observation that a rapidly moving extended object appears optically *rotated*
+rather than Lorentz-contracted, because photons from the far side of the
+object were emitted earlier in time. Baked into a `TerrellPenroseTransform`
+layer, this becomes a per-forward-pass *implicit* augmentation, coupling
+together what classical augmentation pipelines apply independently across
+training steps.
+
+### Status of these claims
+
+These are **hypotheses**, not established empirical results. The
+[`benchmarks/`](benchmarks/) directory is where they are tested. Three
+outcomes are all worth reporting:
+
+- **Null result** — `max_velocity=0` and `max_velocity=0.9` perform
+  indistinguishably → the bias is neutral, neither helpful nor hurtful, and
+  the extension becomes a cleaner way to explore group-equivariant
+  architectures.
+- **Positive result** — the relativistic variant beats the baseline on a
+  specific task or provides transfer benefits → publish as a paper, update
+  the README with numbers.
+- **Negative result** — high velocities consistently hurt → the mechanism is
+  incompatible with how standard GNN / SNN / attention tasks work, which is
+  itself informative for future physics-inspired architectures.
+
+This repository ships the architecture and the tooling. It does not claim
+empirical superiority that has not yet been measured.
+
+---
+
 ## 📦 Installation
 
 ### Quick Install
@@ -54,9 +127,10 @@ pip install -e .
 ### Requirements
 
 - 🐍 Python ≥ 3.11
-- 🔥 PyTorch ≥ 2.0.0
-- 📊 PyTorch Geometric ≥ 2.6.1
-- 🔢 NumPy ≥ 1.20.0
+- 🔥 PyTorch == 2.8.0 (resolved from the `pytorch-cuda` index for CUDA 12.8)
+- 📊 PyTorch Geometric ≥ 2.7.0
+- 🔢 NumPy ≥ 2.0.0
+- 🐼 Pandas ≥ 3.0.0
 
 ---
 
