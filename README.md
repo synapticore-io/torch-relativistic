@@ -106,6 +106,44 @@ outcomes are all worth reporting:
 This repository ships the architecture and the tooling. It does not claim
 empirical superiority that has not yet been measured.
 
+### 📉 First benchmark (Cora, node classification)
+
+| Config | Test accuracy (mean ± std, 3 seeds) |
+|---|---|
+| `GCNConv` baseline | **0.8083 ± 0.0021** |
+| `RelativisticGraphConv` `max_velocity=0.00` | 0.7390 ± 0.0139 |
+| `RelativisticGraphConv` `max_velocity=0.30` | 0.7610 ± 0.0075 |
+| `RelativisticGraphConv` `max_velocity=0.60` | 0.7473 ± 0.0235 |
+| `RelativisticGraphConv` `max_velocity=0.90` | 0.7573 ± 0.0169 |
+
+On Cora this is a **null-to-negative** result, and it is honest to flag
+*why*:
+
+1. **The dominant effect is architectural, not relativistic.** Even at
+   `max_velocity = 0.0` (γ ≈ 1, effectively no relativistic transform) the
+   model trails the baseline by ~7 percentage points. That gap comes from
+   the fact that `GCNConv` performs the classical symmetric normalization
+   `D⁻¹ᐟ² A D⁻¹ᐟ² X W` whereas `RelativisticGraphConv` does not. On Cora,
+   where GCN-style normalization is historically what drives most of the
+   accuracy, that single architectural choice dominates.
+2. **The velocity sweep is flat within noise.** The configs at
+   `v = 0.3`, `0.6`, `0.9` all land within ~1 pp of each other, well inside
+   their across-seed standard deviations. The relativistic signal, in
+   isolation, is not statistically distinguishable on this dataset at these
+   hyperparameters.
+
+Cora is therefore the wrong benchmark to isolate the relativistic
+hypothesis. A cleaner next step is to compare against a non-normalized
+message-passing baseline (e.g. `SAGEConv`) and/or add an optional
+`normalize=True` argument to `RelativisticGraphConv` so the two sides of
+the comparison share their normalization scheme. See
+[`benchmarks/results/cora.md`](benchmarks/results/cora.md) for the full
+interpretation and follow-ups.
+
+**What this README does not claim:** it does not say the relativistic
+variant is better than GCN on node classification. These numbers are
+reported as-is so anyone considering the library gets an honest baseline.
+
 ---
 
 ## 📦 Installation
