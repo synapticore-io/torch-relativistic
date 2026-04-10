@@ -4,7 +4,7 @@ version = "0.2.0"
 description = "Relativistic visual effects and physics simulation toolkit for PyTorch — Lorentz transforms, Terrell-Penrose distortion, aberration, Doppler shift."
 readme = "README.md"
 authors = [
-    { name = "Björn Bethge", email = "bjoern.bethge@gmail.com" }
+    { name = "Björn Bethge", email = "helloworld@synapticore.io" }
 ]
 license = "MIT"
 requires-python = ">=3.11"
