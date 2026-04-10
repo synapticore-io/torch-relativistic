@@ -215,17 +215,9 @@ def main() -> None:
         )
 
     fig.update_layout(
-        title=dict(
-            text=(
-                "Terrell-Penrose Effect: A Cube at Relativistic Speeds<br>"
-                "<sub>Reproducing Schattschneider et al. (Comm. Phys., 2025) — "
-                "the cube appears <b>rotated</b>, not contracted</sub>"
-            ),
-            x=0.5,
-        ),
         width=1600,
-        height=500,
-        margin=dict(l=20, r=20, t=80, b=20),
+        height=520,
+        margin=dict(l=10, r=10, t=50, b=10),
     )
 
     out_dir = Path("examples")
