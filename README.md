@@ -10,408 +10,229 @@
 [![Tests](https://github.com/synapticore-io/torch-relativistic/actions/workflows/tests.yml/badge.svg)](https://github.com/synapticore-io/torch-relativistic/actions/workflows/tests.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-<!-- Logo/Header -->
-<h3>🚀 A PyTorch extension implementing neural networks inspired by relativistic physics</h3>
+<h3>Relativistic visual effects and physics simulation toolkit for PyTorch</h3>
 
-*Physics-inspired neural network layers with measurable results on standard benchmarks* ⚡
+*GPU-accelerated Lorentz transforms, Terrell-Penrose distortion, relativistic aberration and Doppler shift — differentiable and ready for rendering, simulation, and astrophysics.*
 
 </div>
 
 <p align="center">
-  <img src="examples/terrell_penrose_demo.png" alt="Terrell-Penrose effect: a cube at v=0, 0.5c, 0.8c, 0.95c" width="100%">
+  <img src="examples/terrell_penrose_demo.png" alt="Terrell-Penrose effect: a cube at rest, 50%, 80%, 95% light speed" width="100%">
   <br>
-  <em>The Terrell-Penrose effect reproduced computationally: a cube appears <b>rotated</b>, not contracted,
-  at relativistic speeds. Same physics as <a href="https://doi.org/10.1038/s42005-025-02003-6">Schattschneider et al. (2025)</a>.</em>
+  <em>The <b>Terrell-Penrose effect</b> reproduced computationally: a cube appears <b>rotated</b>, not contracted,
+  at relativistic speeds — validated against the analytical formula arcsin(v/c) to machine precision.
+  Same physics as <a href="https://doi.org/10.1038/s42005-025-02003-6">Schattschneider et al. (2025)</a>.</em>
 </p>
 
 ---
 
-## 🌟 Overview
+## What this is
 
-**torch-relativistic** provides neural network modules that incorporate concepts from **special relativity** into
-machine learning. The core idea is that the **Terrell-Penrose effect** — where rapidly moving objects appear rotated
-rather than contracted — can serve as a physics-motivated inductive bias for learned feature transformations.
-The physics implementation is validated against the analytical Terrell-Penrose
-rotation formula (see visualization below). Meaningful benchmarks on data with
-intrinsic Lorentz symmetry (particle jets, point clouds) are in development.
+**torch-relativistic** provides differentiable PyTorch implementations of
+special-relativistic transformations that operate on 3D geometry, point
+clouds, meshes, and spacetime coordinates. Everything runs on GPU and
+supports autograd.
 
-### 🎯 Key Features
+### Core capabilities
 
-- 🧠 **Relativistic Graph Neural Networks (GNNs)** - Process graphs with relativistic information propagation
-- ⚡ **Relativistic Spiking Neural Networks (SNNs)** - Time dilation effects in spiking neurons
-- 🎭 **Relativistic Attention Mechanisms** - Multi-reference frame attention heads
-- 🌀 **Relativistic Transformations** - Lorentz boosts and Terrell-Penrose transforms
-- 🔬 **Physics-Inspired Architecture** - Grounded in real relativistic physics
+- **Lorentz boost** — transform 4D spacetime coordinates between reference
+  frames moving at relative velocity `v` (`LorentzBoost`)
+- **Terrell-Penrose distortion** — compute the apparent visual distortion of
+  objects at relativistic speeds: the rotation, not the contraction
+  (`TerrellPenroseTransform`, `terrell_rotation_angle`)
+- **Relativistic aberration** — how observation angles shift when the
+  observer is in motion
+- **Doppler shift** — frequency / colour shift for approaching and receding
+  sources, including the transverse (time-dilation) component
+- **Lorentz factor** (`gamma`), **time dilation**, **length contraction**,
+  **relativistic velocity addition** — all as differentiable tensor ops
+- **Minkowski metric**, **Levi-Civita tensor**, **spherical harmonics** —
+  for building custom relativistic computations
 
----
+### Use cases
 
-## 🤔 Why Relativistic? The Hypothesis
-
-The first question everyone asks when they see a module called
-`RelativisticGraphConv` is: *why would a neural network care about special
-relativity?* There is no speed of light in a social graph, a molecule, or a
-batch of token embeddings.
-
-The honest answer: **this is an inductive-bias experiment, not a physics
-simulation.** The bet is that three properties of relativistic transformations
-transfer usefully into *learned* feature spaces even when the underlying
-"space" has nothing to do with spacetime.
-
-### 1. Velocity as a learnable soft-scale knob
-
-In a classical graph convolution every neighbour contributes equally (up to
-edge weights). A learnable `velocity ∈ [0, c)` lets the network smoothly
-interpolate between
-
-- a **low-velocity regime** (`γ ≈ 1`), where the layer degenerates to a
-  standard graph conv, and
-- a **high-velocity regime** (`γ → ∞`), where information from far-away
-  nodes is effectively "time-dilated away".
-
-That is a physically-motivated, continuous **locality prior** the optimizer
-can tune *per layer*, without having to commit to a fixed receptive field up
-front. An ablation over `max_velocity` should show: at `v=0` the layer tracks
-the baseline, at moderate `v` something happens, at `v → c` the gradients
-explode (a known failure mode that's easy to detect and to clamp against).
-
-### 2. Lorentz boosts as a feature-space symmetry group
-
-Group-equivariant neural networks (rotation-equivariant CNNs, SE(3)-equivariant
-molecular models, E(3)-NNs) have repeatedly shown that **enforcing a symmetry
-of the domain as an architectural invariant acts as an extremely strong
-regularizer**. The Lorentz group is a well-studied continuous Lie group with
-a known representation theory — applying it as an equivariance constraint is
-concretely doable (`LorentzBoost` is a 4×4 matrix multiply). Whether it
-*helps* in domains that do not have an intrinsic 4-vector structure is
-exactly the open question.
-
-### 3. Terrell-Penrose as implicit augmentation
-
-Rotation-based data augmentation routinely improves CNN performance. The
-**Terrell-Penrose effect** (Terrell 1959, Penrose 1959) is the counter-intuitive
-observation that a rapidly moving extended object appears optically *rotated*
-rather than Lorentz-contracted, because photons from the far side of the
-object were emitted earlier in time. After 66 years as a purely theoretical
-prediction, the effect was [first observed in the lab in May 2025](https://doi.org/10.1038/s42005-025-02003-6)
-by Schattschneider et al. at TU Wien using high-speed cameras and laser
-pulses — the direct inspiration for this library. Baked into a
-`TerrellPenroseTransform` layer, the rotation becomes a per-forward-pass
-*implicit* augmentation, coupling together what classical augmentation
-pipelines apply independently across training steps.
-
-### Status of these claims
-
-These are **hypotheses**, not established empirical results. The
-[`benchmarks/`](benchmarks/) directory is where they are tested. Three
-outcomes are all worth reporting:
-
-- **Null result** — `max_velocity=0` and `max_velocity=0.9` perform
-  indistinguishably → the bias is neutral, neither helpful nor hurtful, and
-  the extension becomes a cleaner way to explore group-equivariant
-  architectures.
-- **Positive result** — the relativistic variant beats the baseline on a
-  specific task or provides transfer benefits → publish as a paper, update
-  the README with numbers.
-- **Negative result** — high velocities consistently hurt → the mechanism is
-  incompatible with how standard GNN / SNN / attention tasks work, which is
-  itself informative for future physics-inspired architectures.
-
-This repository ships the architecture and the tooling. It does not claim
-empirical superiority that has not yet been measured.
-
-### 🔬 Validation and Benchmarks
-
-The library's physics implementation is validated against the analytical
-Terrell-Penrose rotation formula — see the visualization above, where
-`terrell_rotation_angle()` matches `arcsin(v/c)` to machine precision
-at all tested velocities.
-
-The [`benchmarks/`](benchmarks/) directory contains infrastructure for
-evaluating `RelativisticGraphConv` against standard baselines. Sanity
-checks on Planetoid citation graphs (Cora, CiteSeer, PubMed) confirm
-the architecture does not degrade on standard tasks, but **citation
-graphs lack spatial structure, velocities, and physical dynamics** — they
-cannot test the relativistic hypothesis.
-
-Meaningful benchmarks require data where the Lorentz group is a real
-symmetry. Planned evaluations include:
-
-- **Particle physics jet tagging** — particles carry 4-momenta
-  $(E, p_x, p_y, p_z)$; Lorentz invariance is the physical symmetry of
-  the problem. Baseline: [LorentzNet](https://arxiv.org/abs/2201.08187).
-- **Point clouds with motion** — LiDAR scans of moving objects where
-  "velocity" has real physical meaning.
-- **N-body simulations** — cosmological snapshots with positions and
-  velocities.
-
-These are planned for a future release. Contributions welcome.
+| Domain | Example |
+|---|---|
+| **Relativistic rendering** | What does a spaceship / star / accretion disk look like at 0.9c? Physically correct visual distortion for games, VR, educational tools. |
+| **Astrophysics visualization** | Relativistic jets, binary pulsars, cosmological simulations with real particle velocities. |
+| **Science education** | Interactive demos for special relativity courses — the same kind of demonstration Schattschneider et al. built in the lab, but as a software tool. |
+| **Shader / post-processing** | The Terrell-Penrose distortion field as a velocity-parameterized render pass, applicable to any 3D scene. |
+| **Physics simulation** | Differentiable relativistic transforms for optimization, inverse problems, or learnable physics. |
 
 ---
 
-## 📦 Installation
-
-### Quick Install
+## Installation
 
 ```bash
 pip install torch-relativistic
 ```
 
-### Development Install
+Development install:
 
 ```bash
 git clone https://github.com/synapticore-io/torch-relativistic.git
 cd torch-relativistic
-pip install -e .
-```
-
-### Requirements
-
-- 🐍 Python ≥ 3.11
-- 🔥 PyTorch == 2.8.0 (resolved from the `pytorch-cuda` index for CUDA 12.8)
-- 📊 PyTorch Geometric ≥ 2.7.0
-- 🔢 NumPy ≥ 2.0.0
-- 🐼 Pandas ≥ 3.0.0
-
----
-
-## 🚀 Quick Start
-
-```python
-import torch
-from torch_relativistic import RelativisticGraphConv
-
-# Create a relativistic GNN layer
-conv = RelativisticGraphConv(16, 32, max_relative_velocity=0.8)
-x = torch.randn(10, 16)
-edge_index = torch.tensor([[0, 1, 2], [1, 2, 0]], dtype=torch.long)
-
-# Process with relativistic effects
-output = conv(x, edge_index)  # Shape: [10, 32]
-```
-
----
-
-## 📚 Components
-
-### 🌐 Relativistic Graph Neural Networks
-
-GNN modules that process information as if affected by relativistic phenomena:
-
-```python
-import torch
-from torch_relativistic.gnn import RelativisticGraphConv, MultiObserverGNN
-
-# Create a simple graph
-num_nodes = 10
-feature_dim = 16
-edge_index = torch.tensor([[0, 1, 1, 2, 2, 3, 3, 4, 4, 0],
-                           [1, 0, 2, 1, 3, 2, 4, 3, 0, 4]], dtype=torch.long)
-node_features = torch.randn(num_nodes, feature_dim)
-
-# Create a relativistic GNN layer
-conv = RelativisticGraphConv(
-    in_channels=feature_dim,
-    out_channels=32,
-    max_relative_velocity=0.8
-)
-
-# Process the graph
-output_features = conv(node_features, edge_index)
-print(f"Output shape: {output_features.shape}")  # [10, 32]
-
-# Multi-observer GNN processes the graph from multiple relativistic perspectives
-multi_observer_gnn = MultiObserverGNN(
-    feature_dim=feature_dim,
-    hidden_dim=32,
-    output_dim=8,
-    num_observers=4
-)
-
-output = multi_observer_gnn(node_features, edge_index)
-print(f"Multi-observer output shape: {output.shape}")  # [10, 8]
-```
-
-### ⚡ Relativistic Spiking Neural Networks
-
-SNN components that incorporate relativistic time dilation:
-
-```python
-import torch
-from torch_relativistic.snn import RelativisticLIFNeuron, TerrellPenroseSNN
-
-# Create input spikes (batch_size=32, input_size=10)
-input_spikes = torch.bernoulli(torch.ones(32, 10) * 0.3)
-
-# Create a relativistic LIF neuron
-neuron = RelativisticLIFNeuron(
-    input_size=10,
-    threshold=1.0,
-    beta=0.9
-)
-
-# Initialize neuron state
-initial_state = neuron.init_state(batch_size=32)
-
-# Process input spikes
-output_spikes, new_state = neuron(input_spikes, initial_state)
-print(f"Output spikes shape: {output_spikes.shape}")  # [32]
-
-# Create a complete SNN
-snn = TerrellPenroseSNN(
-    input_size=10,
-    hidden_size=20,
-    output_size=5,
-    simulation_steps=100
-)
-
-# Process input
-output = snn(input_spikes)
-print(f"SNN output shape: {output.shape}")  # [32, 5]
-
-# Get spike history for visualization
-spike_history = snn.get_spike_history(input_spikes)
-print(f"Hidden spike history shape: {spike_history['hidden_spikes'].shape}")  # [32, 100, 20]
-```
-
-### 🎭 Relativistic Attention Mechanism
-
-Attention where different heads operate in different reference frames:
-
-```python
-import torch
-from torch_relativistic.attention import RelativisticSelfAttention
-
-# Create input sequence (batch_size=16, seq_len=24, feature_dim=64)
-seq = torch.randn(16, 24, 64)
-
-# Create relativistic self-attention module
-attention = RelativisticSelfAttention(
-    hidden_dim=64,
-    num_heads=8,
-    dropout=0.1,
-    max_velocity=0.9
-)
-
-# Optional: 3D positions for spacetime-aware attention.
-# Shape [batch, seq_len, D]: internally reduced to a scalar per token
-# via L2 norm for rotary position embedding frequencies.
-positions = torch.randn(16, 24, 3)
-
-# Process sequence
-output = attention(seq, positions=positions)
-print(f"Output shape: {output.shape}")  # [16, 24, 64]
-```
-
-### 🌀 Relativistic Transformations
-
-Apply transformations inspired by special relativity to feature vectors:
-
-```python
-import torch
-from torch_relativistic.transforms import TerrellPenroseTransform, LorentzBoost
-
-# Create feature vectors (batch_size=8, feature_dim=64)
-features = torch.randn(8, 64)
-
-# Apply Terrell-Penrose inspired transformation
-transform = TerrellPenroseTransform(
-    feature_dim=64,
-    max_velocity=0.9,
-    mode="rotation"
-)
-
-transformed = transform(features)
-print(f"Transformed shape: {transformed.shape}")  # [8, 64]
-
-# For spacetime features (batch_size=8, feature_dim=8 including 4D spacetime)
-spacetime_features = torch.randn(8, 8)
-
-# Apply Lorentz boost
-boost = LorentzBoost(
-    feature_dim=8,
-    time_dim=0,  # First dimension is time
-    max_velocity=0.8
-)
-
-boosted = boost(spacetime_features)
-print(f"Boosted shape: {boosted.shape}")  # [8, 8]
-```
-
----
-
-## 🧪 Development
-
-### Running Tests
-
-```bash
-# Install development dependencies
 pip install -e ".[dev]"
-
-# Run tests
-pytest tests/ -v
-
-# Run with coverage
-pytest tests/ --cov=torch_relativistic
 ```
 
-### Code Quality
+Requirements: Python ≥ 3.11, PyTorch ≥ 2.0.
+
+---
+
+## Quick Start
+
+### Terrell-Penrose distortion of a 3D object
+
+```python
+import torch, math
+from torch_relativistic.utils import terrell_rotation_angle
+
+# At what angle does a cube appear rotated at 80% light speed?
+v = torch.tensor(0.8)
+angle = terrell_rotation_angle(v)
+print(f"Apparent rotation: {math.degrees(angle):.1f}°")  # 53.1°
+
+# This matches the analytical formula: arcsin(v/c)
+assert abs(angle.item() - math.asin(0.8)) < 1e-6
+```
+
+### Lorentz boost on spacetime coordinates
+
+```python
+import torch
+from torch_relativistic.transforms import LorentzBoost
+
+# 4D spacetime events: (t, x, y, z)
+events = torch.randn(100, 8)  # batch of 100 events, 8-dim features
+
+boost = LorentzBoost(feature_dim=8, time_dim=0, max_velocity=0.9)
+boosted = boost(events)  # transformed to a moving reference frame
+```
+
+### Relativistic Doppler shift
+
+```python
+import torch
+from torch_relativistic.utils import relativistic_doppler_factor, calculate_gamma
+
+v = torch.tensor(0.5)  # 50% light speed
+doppler = relativistic_doppler_factor(v)
+print(f"Doppler factor (head-on): {doppler:.3f}")  # blueshift for approach
+
+# Transverse Doppler = pure time dilation
+import math
+gamma = calculate_gamma(v)
+doppler_transverse = relativistic_doppler_factor(v, torch.tensor(math.pi / 2))
+# doppler_transverse ≈ gamma (the transverse Doppler effect)
+```
+
+### Interactive 3D visualization
 
 ```bash
-# Format code
-black src/ tests/
-
-# Check linting
-ruff check src/ tests/
-
-# Type checking
-mypy src/
+# Generate an interactive demo of the Terrell-Penrose effect
+uv run python examples/terrell_penrose_demo.py
+# → opens examples/terrell_penrose_demo.html in your browser
 ```
 
 ---
 
-## 🤝 Contributing
+## Physics reference
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+### The Terrell-Penrose effect
 
-### 🛠️ Development Setup
+In 1959, James Terrell and Roger Penrose independently showed that a
+rapidly moving object does not appear Lorentz-contracted to an observer —
+instead it appears **rotated** by an angle
 
-1. **Fork** the repository
-2. **Clone** your fork: `git clone https://github.com/synapticore-io/torch-relativistic.git`
-3. **Install** in development mode: `pip install -e ".[dev]"`
-4. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-5. **Make** your changes and add tests
-6. **Run** tests: `pytest tests/`
-7. **Submit** a pull request
+$$\theta = \arcsin(v/c)$$
+
+This counter-intuitive result arises because photons from the far side of
+the object were emitted earlier (when the object was in a different position)
+and arrive at the same time as photons from the near side.
+
+After 66 years as a purely theoretical prediction, the effect was
+[first observed in the lab in May 2025](https://doi.org/10.1038/s42005-025-02003-6)
+by Schattschneider et al. at TU Wien using high-speed cameras and laser
+pulses — the direct inspiration for this library.
+
+### Validated against analytical formulas
+
+The `terrell_rotation_angle()` function matches `arcsin(v/c)` to machine
+precision at all tested velocities (see
+[`examples/terrell_penrose_demo.py`](examples/terrell_penrose_demo.py)):
+
+```
+v/c   | arcsin (deg) | torch-relativistic | match
+0.50  |      30.0000 |           30.0000  | yes
+0.80  |      53.1301 |           53.1301  | yes
+0.95  |      71.8051 |           71.8051  | yes
+```
 
 ---
 
-## 📄 License
+## API overview
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+### `torch_relativistic.transforms`
+
+| Class | What it does |
+|---|---|
+| `LorentzBoost(feature_dim, time_dim, max_velocity)` | Apply a Lorentz boost to spacetime feature vectors |
+| `TerrellPenroseTransform(feature_dim, max_velocity, mode)` | Apply apparent-rotation distortion to feature vectors |
+
+### `torch_relativistic.utils`
+
+| Function | What it computes |
+|---|---|
+| `calculate_gamma(velocity)` | Lorentz factor γ = 1/√(1−v²) |
+| `terrell_rotation_angle(velocity)` | Apparent rotation θ = arcsin(v/c) |
+| `lorentz_contraction(length, velocity)` | Contracted length L/γ |
+| `time_dilation(time, velocity)` | Dilated time t·γ |
+| `velocity_addition(v1, v2)` | Relativistic velocity sum |
+| `relativistic_doppler_factor(v, angle)` | Frequency shift factor |
+| `lorentz_transform_spacetime(coords, velocity)` | Full 4D Lorentz transformation |
+| `MinkowskiMetric(signature)` | Spacetime interval, index raising/lowering |
+
+### Experimental: ML modules
+
+The library also includes **experimental** neural network modules that
+apply relativistic transformations inside graph, spiking, and attention
+layers. These are research-stage and have not yet demonstrated empirical
+ML benefits on tested datasets:
+
+- `torch_relativistic.gnn` — `RelativisticGraphConv`, `MultiObserverGNN`
+- `torch_relativistic.snn` — `RelativisticLIFNeuron`, `TerrellPenroseSNN`
+- `torch_relativistic.attention` — `RelativisticSelfAttention`
+
+Contributions and benchmarks on domains with intrinsic Lorentz symmetry
+(particle physics, relativistic simulations) are welcome.
 
 ---
 
-## 📖 How to Cite
+## Development
 
-If you use torch-relativistic in research that leads to a publication,
-please cite the software. GitHub shows a "Cite this repository" button
-in the right sidebar (generated from `CITATION.cff`).
+```bash
+uv sync                        # install all deps
+uv run pytest tests/ -v        # run 50 tests
+uv run ruff check src/ tests/  # lint
+uv run black src/ tests/       # format
+```
 
-### BibTeX
+---
+
+## How to Cite
 
 ```bibtex
 @software{bethge_torch_relativistic,
   author       = {Bethge, Björn},
-  title        = {{torch-relativistic: Physics-inspired PyTorch layers
-                   based on the Terrell-Penrose effect}},
+  title        = {{torch-relativistic: Relativistic visual effects and
+                   physics simulation toolkit for PyTorch}},
   year         = {2026},
   version      = {0.2.0},
   url          = {https://github.com/synapticore-io/torch-relativistic}
 }
 ```
 
-If your work also relates to the experimental observation of the
-Terrell-Penrose effect, please cite the original paper:
+If your work relates to the Terrell-Penrose effect, please also cite:
 
 ```bibtex
 @article{schattschneider2025snapshot,
@@ -426,31 +247,20 @@ Terrell-Penrose effect, please cite the original paper:
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- 🔬 **Directly inspired by** the [first experimental observation of the
+- **Directly inspired by** the [first experimental observation of the
   Terrell-Penrose effect](https://doi.org/10.1038/s42005-025-02003-6) by
-  Schattschneider et al. at TU Wien (Communications Physics, May 2025) —
-  66 years after its theoretical prediction by Terrell and Penrose in 1959
-- 🌌 Grounded in Einstein's **Special Theory of Relativity**
-- 🔥 Powered by **PyTorch** and **PyTorch Geometric**
-- ⚡ Thanks to the open-source ML and physics communities
+  Schattschneider et al. at TU Wien (Communications Physics, May 2025)
+- Grounded in Einstein's **Special Theory of Relativity**
+- Powered by **PyTorch**
 
 ---
 
-## 📞 Contact & Links
+## License
+
+MIT — see [LICENSE](LICENSE).
 
 <div align="center">
-
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/synapticore-io/torch-relativistic)
-[![PyPI](https://img.shields.io/badge/PyPI-3775A9?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/torch-relativistic/)
-
-**Made with ❤️ and ⚛️ physics**
-
-</div>
-
----
-
-<div align="center">
-<sub>Built with 🔥 PyTorch • Inspired by 🌌 Einstein • Powered by ⚛️ Physics</sub>
+<sub>Built with 🔥 PyTorch · Inspired by 🌌 Einstein · Powered by ⚛️ Physics</sub>
 </div>

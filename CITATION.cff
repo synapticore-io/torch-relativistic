@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use torch-relativistic in your research, please cite it as below."
-title: "torch-relativistic: Physics-inspired PyTorch layers based on the Terrell-Penrose effect"
+title: "torch-relativistic: Relativistic visual effects and physics simulation toolkit for PyTorch"
 type: software
 authors:
   - given-names: Björn
@@ -12,16 +12,15 @@ license: MIT
 version: "0.2.0"
 date-released: "2026-04-10"
 abstract: >-
-  torch-relativistic provides PyTorch neural network modules that
-  incorporate concepts from special relativity into machine learning.
-  It implements relativistic graph neural networks (with an optional
-  GCN-style normalization that outperforms stock GCNConv by +1.6pp
-  on Cora), spiking neural networks with relativistic time dilation
-  and differentiable surrogate gradients, multi-reference-frame
-  attention mechanisms, and Lorentz boost / Terrell-Penrose feature
-  transforms. Inspired by the first experimental observation of the
-  Terrell-Penrose effect (Schattschneider et al., Communications
-  Physics, 2025).
+  torch-relativistic provides differentiable PyTorch implementations
+  of special-relativistic transformations for rendering, simulation,
+  and astrophysics: Lorentz boosts on spacetime coordinates,
+  Terrell-Penrose visual distortion (validated against arcsin(v/c) to
+  machine precision), relativistic aberration, Doppler shift,
+  Minkowski metric operations, and time dilation / length contraction
+  primitives. GPU-accelerated and autograd-compatible. Inspired by the
+  first experimental observation of the Terrell-Penrose effect
+  (Schattschneider et al., Communications Physics, 2025).
 keywords:
   - pytorch
   - graph-neural-networks
