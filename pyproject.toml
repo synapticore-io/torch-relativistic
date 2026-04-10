@@ -50,6 +50,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "black>=25.1.0",
+    "kaleido>=1.2.0",
     "mypy>=1.15.0",
     "pytest>=9.0.0",
     "ruff>=0.15.0",

@@ -17,6 +17,13 @@
 
 </div>
 
+<p align="center">
+  <img src="examples/terrell_penrose_demo.png" alt="Terrell-Penrose effect: a cube at v=0, 0.5c, 0.8c, 0.95c" width="100%">
+  <br>
+  <em>The Terrell-Penrose effect reproduced computationally: a cube appears <b>rotated</b>, not contracted,
+  at relativistic speeds. Same physics as <a href="https://doi.org/10.1038/s42005-025-02003-6">Schattschneider et al. (2025)</a>.</em>
+</p>
+
 ---
 
 ## 🌟 Overview
