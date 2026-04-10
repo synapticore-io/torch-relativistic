@@ -31,8 +31,9 @@
 **torch-relativistic** provides neural network modules that incorporate concepts from **special relativity** into
 machine learning. The core idea is that the **Terrell-Penrose effect** — where rapidly moving objects appear rotated
 rather than contracted — can serve as a physics-motivated inductive bias for learned feature transformations.
-On Cora node classification, `RelativisticGraphConv` with `normalize=True` outperforms stock `GCNConv` by +1.6pp
-([benchmark](benchmarks/results/cora.md)).
+In an initial Cora node-classification benchmark (3 seeds, 2708 nodes),
+`RelativisticGraphConv` with `normalize=True` outperforms stock `GCNConv`
+by +1.6pp — see the [full results and interpretation](benchmarks/results/cora.md).
 
 ### 🎯 Key Features
 
