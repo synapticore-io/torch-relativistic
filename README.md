@@ -31,9 +31,9 @@
 **torch-relativistic** provides neural network modules that incorporate concepts from **special relativity** into
 machine learning. The core idea is that the **Terrell-Penrose effect** — where rapidly moving objects appear rotated
 rather than contracted — can serve as a physics-motivated inductive bias for learned feature transformations.
-Across the standard Planetoid benchmarks (Cora, CiteSeer, PubMed),
-`RelativisticGraphConv` with `normalize=True` is consistently competitive
-with stock `GCNConv` — see the [full results](benchmarks/results/).
+The physics implementation is validated against the analytical Terrell-Penrose
+rotation formula (see visualization below). Meaningful benchmarks on data with
+intrinsic Lorentz symmetry (particle jets, point clouds) are in development.
 
 ### 🎯 Key Features
 
@@ -119,39 +119,32 @@ outcomes are all worth reporting:
 This repository ships the architecture and the tooling. It does not claim
 empirical superiority that has not yet been measured.
 
-### 📊 Benchmarks (Planetoid node classification, 3 seeds)
+### 🔬 Validation and Benchmarks
 
-<p align="center">
-  <img src="benchmarks/results/comparison.png" alt="Benchmark comparison across Cora, CiteSeer, PubMed" width="80%">
-</p>
+The library's physics implementation is validated against the analytical
+Terrell-Penrose rotation formula — see the visualization above, where
+`terrell_rotation_angle()` matches `arcsin(v/c)` to machine precision
+at all tested velocities.
 
-| Config | Cora | CiteSeer | PubMed |
-|---|---|---|---|
-| `GCNConv` | 81.2 ± 0.7% | 68.8 ± 0.7% | **78.5 ± 0.5%** |
-| `SAGEConv` | 80.7 ± 0.5% | **69.5 ± 0.2%** | 76.7 ± 0.3% |
-| **`Rel. norm v=0`** | **81.7 ± 0.1%** | 69.2 ± 0.7% | **78.6 ± 0.4%** |
-| `Rel. norm v=0.3` | 80.4 ± 1.1% | 68.8 ± 0.9% | 77.9 ± 1.0% |
+The [`benchmarks/`](benchmarks/) directory contains infrastructure for
+evaluating `RelativisticGraphConv` against standard baselines. Sanity
+checks on Planetoid citation graphs (Cora, CiteSeer, PubMed) confirm
+the architecture does not degrade on standard tasks, but **citation
+graphs lack spatial structure, velocities, and physical dynamics** — they
+cannot test the relativistic hypothesis.
 
-`RelativisticGraphConv` with `normalize=True` at `max_velocity=0` is
-**consistently competitive with standard GCNConv** across all three
-Planetoid datasets, with a small edge on Cora (+0.5pp with the lowest
-variance of any config) and near-parity on PubMed. On CiteSeer all
-methods are within noise of each other.
+Meaningful benchmarks require data where the Lorentz group is a real
+symmetry. Planned evaluations include:
 
-The gain comes from the architecture's in-message linear transform and
-position-aware weighting — not from the velocity parameter, which
-provides no benefit on these homophilic citation graphs. The velocity
-knob is expected to become more relevant on tasks with intrinsic spatial
-structure (point clouds, molecular graphs).
+- **Particle physics jet tagging** — particles carry 4-momenta
+  $(E, p_x, p_y, p_z)$; Lorentz invariance is the physical symmetry of
+  the problem. Baseline: [LorentzNet](https://arxiv.org/abs/2201.08187).
+- **Point clouds with motion** — LiDAR scans of moving objects where
+  "velocity" has real physical meaning.
+- **N-body simulations** — cosmological snapshots with positions and
+  velocities.
 
-Without `normalize=True`, performance drops to ~75% on Cora, confirming
-that fair comparisons require matching the normalization scheme.
-
-See [`benchmarks/results/`](benchmarks/results/) for per-dataset tables,
-raw JSON results, and the full interpretation.
-
-**Key takeaway for users**: use `normalize=True` with `max_velocity=0`
-as the default on homophilic graphs.
+These are planned for a future release. Contributions welcome.
 
 ---
 
