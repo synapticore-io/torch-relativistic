@@ -171,14 +171,19 @@ def main() -> None:
     velocities = [0.0, 0.5, 0.8, 0.95]
     n = len(velocities)
 
+    labels = []
+    for v in velocities:
+        if v < 1e-12:
+            labels.append("At rest")
+        else:
+            pct = int(v * 100)
+            rot = math.degrees(math.asin(v))
+            labels.append(f"{pct}% light speed — {rot:.0f}° apparent rotation")
+
     fig = make_subplots(
         rows=1, cols=n,
         specs=[[{"type": "scene"}] * n],
-        subplot_titles=[
-            f"v = {v:.2f}c  (rotation = {math.degrees(math.asin(v)):.1f}°)"
-            if v > 0 else "v = 0 (at rest)"
-            for v in velocities
-        ],
+        subplot_titles=labels,
         horizontal_spacing=0.02,
     )
 
@@ -214,10 +219,14 @@ def main() -> None:
             aspectmode="cube",
         )
 
+    # Push subplot title annotations down slightly so they don't clip
+    for ann in fig.layout.annotations:
+        ann.update(y=ann.y - 0.03, font=dict(size=13))
+
     fig.update_layout(
         width=1600,
-        height=520,
-        margin=dict(l=10, r=10, t=50, b=10),
+        height=550,
+        margin=dict(l=10, r=10, t=60, b=10),
     )
 
     out_dir = Path("examples")
