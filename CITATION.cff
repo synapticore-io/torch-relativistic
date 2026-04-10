@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+message: "If you use torch-relativistic in your research, please cite it as below."
+title: "torch-relativistic: Physics-inspired PyTorch layers based on the Terrell-Penrose effect"
+type: software
+authors:
+  - given-names: Björn
+    family-names: Bethge
+    orcid: "https://orcid.org/0009-0003-4500-0274"
+repository-code: "https://github.com/synapticore-io/torch-relativistic"
+url: "https://pypi.org/project/torch-relativistic/"
+license: MIT
+version: "0.2.0"
+date-released: "2026-04-10"
+abstract: >-
+  torch-relativistic provides PyTorch neural network modules that
+  incorporate concepts from special relativity into machine learning.
+  It implements relativistic graph neural networks (with an optional
+  GCN-style normalization that outperforms stock GCNConv by +1.6pp
+  on Cora), spiking neural networks with relativistic time dilation
+  and differentiable surrogate gradients, multi-reference-frame
+  attention mechanisms, and Lorentz boost / Terrell-Penrose feature
+  transforms. Inspired by the first experimental observation of the
+  Terrell-Penrose effect (Schattschneider et al., Communications
+  Physics, 2025).
+keywords:
+  - pytorch
+  - graph-neural-networks
+  - spiking-neural-networks
+  - attention
+  - special-relativity
+  - terrell-penrose-effect
+  - lorentz-boost
+  - physics-inspired-ml
+  - inductive-bias
+references:
+  - type: article
+    authors:
+      - family-names: Schattschneider
+        given-names: Peter
+    title: "A Snapshot of Relativistic Motion: Visualizing the Terrell-Penrose Effect"
+    journal: "Communications Physics"
+    year: 2025
+    month: 5
+    doi: "10.1038/s42005-025-02003-6"
+    scope: >-
+      The experimental paper that inspired this software — first lab
+      observation of the Terrell-Penrose effect, 66 years after its
+      theoretical prediction.

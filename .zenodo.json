@@ -1,0 +1,43 @@
+{
+  "title": "torch-relativistic: Physics-inspired PyTorch layers based on the Terrell-Penrose effect",
+  "description": "<p>torch-relativistic provides PyTorch neural network modules that incorporate concepts from special relativity into machine learning: relativistic graph neural networks (GNNs) with optional GCN-style normalization, spiking neural networks (SNNs) with relativistic time dilation and differentiable surrogate gradients, multi-reference-frame attention mechanisms, and Lorentz boost / Terrell-Penrose feature transforms.</p><p>On Cora node classification, <code>RelativisticGraphConv</code> with <code>normalize=True</code> outperforms stock <code>GCNConv</code> by +1.6 percentage points (81.80% vs 80.17%, 3-seed mean). The gain comes from the architecture's position-aware in-message transform acting as implicit per-edge attention.</p><p>Inspired by the first experimental observation of the Terrell-Penrose effect by Schattschneider et al. (Communications Physics, 2025) — 66 years after its theoretical prediction by Terrell and Penrose in 1959.</p>",
+  "creators": [
+    {
+      "name": "Bethge, Björn",
+      "orcid": "0009-0003-4500-0274"
+    }
+  ],
+  "keywords": [
+    "pytorch",
+    "graph-neural-networks",
+    "spiking-neural-networks",
+    "attention",
+    "special-relativity",
+    "terrell-penrose-effect",
+    "lorentz-boost",
+    "physics-inspired-ml"
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "related_identifiers": [
+    {
+      "scheme": "url",
+      "identifier": "https://github.com/synapticore-io/torch-relativistic",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "scheme": "url",
+      "identifier": "https://pypi.org/project/torch-relativistic/",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "scheme": "doi",
+      "identifier": "10.1038/s42005-025-02003-6",
+      "relation": "isInspiredBy",
+      "resource_type": "publication-article"
+    }
+  ]
+}

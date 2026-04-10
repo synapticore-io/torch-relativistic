@@ -83,10 +83,13 @@ Rotation-based data augmentation routinely improves CNN performance. The
 **Terrell-Penrose effect** (Terrell 1959, Penrose 1959) is the counter-intuitive
 observation that a rapidly moving extended object appears optically *rotated*
 rather than Lorentz-contracted, because photons from the far side of the
-object were emitted earlier in time. Baked into a `TerrellPenroseTransform`
-layer, this becomes a per-forward-pass *implicit* augmentation, coupling
-together what classical augmentation pipelines apply independently across
-training steps.
+object were emitted earlier in time. After 66 years as a purely theoretical
+prediction, the effect was [first observed in the lab in May 2025](https://doi.org/10.1038/s42005-025-02003-6)
+by Schattschneider et al. at TU Wien using high-speed cameras and laser
+pulses — the direct inspiration for this library. Baked into a
+`TerrellPenroseTransform` layer, the rotation becomes a per-forward-pass
+*implicit* augmentation, coupling together what classical augmentation
+pipelines apply independently across training steps.
 
 ### Status of these claims
 
@@ -383,12 +386,50 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
+## 📖 How to Cite
+
+If you use torch-relativistic in research that leads to a publication,
+please cite the software. GitHub shows a "Cite this repository" button
+in the right sidebar (generated from `CITATION.cff`).
+
+### BibTeX
+
+```bibtex
+@software{bethge_torch_relativistic,
+  author       = {Bethge, Björn},
+  title        = {{torch-relativistic: Physics-inspired PyTorch layers
+                   based on the Terrell-Penrose effect}},
+  year         = {2026},
+  version      = {0.2.0},
+  url          = {https://github.com/synapticore-io/torch-relativistic}
+}
+```
+
+If your work also relates to the experimental observation of the
+Terrell-Penrose effect, please cite the original paper:
+
+```bibtex
+@article{schattschneider2025snapshot,
+  author  = {Schattschneider, Peter and others},
+  title   = {A Snapshot of Relativistic Motion: Visualizing the
+             Terrell-Penrose Effect},
+  journal = {Communications Physics},
+  year    = {2025},
+  doi     = {10.1038/s42005-025-02003-6}
+}
+```
+
+---
+
 ## 🙏 Acknowledgments
 
-- 🌌 Inspired by Einstein's **Special Theory of Relativity**
-- 🔬 Built on the **Terrell-Penrose effect** from relativistic physics
+- 🔬 **Directly inspired by** the [first experimental observation of the
+  Terrell-Penrose effect](https://doi.org/10.1038/s42005-025-02003-6) by
+  Schattschneider et al. at TU Wien (Communications Physics, May 2025) —
+  66 years after its theoretical prediction by Terrell and Penrose in 1959
+- 🌌 Grounded in Einstein's **Special Theory of Relativity**
 - 🔥 Powered by **PyTorch** and **PyTorch Geometric**
-- ⚡ Thanks to the open-source ML community
+- ⚡ Thanks to the open-source ML and physics communities
 
 ---
 
@@ -398,8 +439,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/synapticore-io/torch-relativistic)
 [![PyPI](https://img.shields.io/badge/PyPI-3775A9?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/torch-relativistic/)
-[![Documentation](https://img.shields.io/badge/Docs-4285F4?style=for-the-badge&logo=read-the-docs&logoColor=white)](https://torch-relativistic.readthedocs.io/)
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:bjoern.bethge@gmail.com)
 
 **Made with ❤️ and ⚛️ physics**
 
