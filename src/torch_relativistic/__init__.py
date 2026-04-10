@@ -16,7 +16,7 @@ Main components:
 Authors: Björn Bethge
 """
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 from torch_relativistic.gnn import RelativisticGraphConv, MultiObserverGNN
 from torch_relativistic.snn import RelativisticLIFNeuron, TerrellPenroseSNN

@@ -13,7 +13,7 @@
 <!-- Logo/Header -->
 <h3>🚀 A PyTorch extension implementing neural networks inspired by relativistic physics</h3>
 
-*Harness the power of the Terrell-Penrose effect for novel information processing paradigms* ⚡
+*Physics-inspired neural network layers with measurable results on standard benchmarks* ⚡
 
 </div>
 
@@ -22,8 +22,10 @@
 ## 🌟 Overview
 
 **torch-relativistic** provides neural network modules that incorporate concepts from **special relativity** into
-machine learning. The key insight is that the **Terrell-Penrose effect**, where rapidly moving objects appear rotated
-rather than contracted, can inspire revolutionary information processing paradigms in neural networks.
+machine learning. The core idea is that the **Terrell-Penrose effect** — where rapidly moving objects appear rotated
+rather than contracted — can serve as a physics-motivated inductive bias for learned feature transformations.
+On Cora node classification, `RelativisticGraphConv` with `normalize=True` outperforms stock `GCNConv` by +1.6pp
+([benchmark](benchmarks/results/cora.md)).
 
 ### 🎯 Key Features
 
