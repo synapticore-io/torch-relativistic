@@ -64,7 +64,7 @@ supports autograd.
 ## Installation
 
 ```bash
-pip install torch-relativistic
+uv add torch-relativistic
 ```
 
 Development install:
@@ -72,7 +72,7 @@ Development install:
 ```bash
 git clone https://github.com/synapticore-io/torch-relativistic.git
 cd torch-relativistic
-pip install -e ".[dev]"
+uv sync --dev
 ```
 
 Requirements: Python ≥ 3.11, PyTorch ≥ 2.0.
