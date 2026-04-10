@@ -1,0 +1,316 @@
+{
+  "dataset": "PubMed",
+  "config": {
+    "hidden": 64,
+    "epochs": 200,
+    "lr": 0.01,
+    "weight_decay": 0.0005,
+    "dropout": 0.5,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "velocities": [
+      0.0,
+      0.3,
+      0.6,
+      0.9
+    ],
+    "device": "cuda"
+  },
+  "summary": {
+    "baseline_gcn": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.7853333333333333,
+      "test_acc_std": 0.004932882862316252,
+      "val_acc_mean": 0.7933333333333333,
+      "val_acc_std": 0.0030550504633038962,
+      "train_time_s_mean": 2.1366406333302925
+    },
+    "baseline_sage": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.7673333333333333,
+      "test_acc_std": 0.0030550504633038962,
+      "val_acc_mean": 0.802,
+      "val_acc_std": 0.0020000000000000018,
+      "train_time_s_mean": 2.687502333341399
+    },
+    "relativistic_v0.00": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.777,
+      "test_acc_std": 0.007810249675906661,
+      "val_acc_mean": 0.788,
+      "val_acc_std": 0.003464101615137758,
+      "train_time_s_mean": 8.020029099997677
+    },
+    "relativistic_v0.30": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.762,
+      "test_acc_std": 0.011357816691600558,
+      "val_acc_mean": 0.7926666666666667,
+      "val_acc_std": 0.00923760430703402,
+      "train_time_s_mean": 7.739828133334716
+    },
+    "relativistic_v0.60": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.7626666666666667,
+      "test_acc_std": 0.008504900548115391,
+      "val_acc_mean": 0.784,
+      "val_acc_std": 0.0020000000000000018,
+      "train_time_s_mean": 7.95489683333047
+    },
+    "relativistic_v0.90": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.7656666666666667,
+      "test_acc_std": 0.009451631252505225,
+      "val_acc_mean": 0.7906666666666667,
+      "val_acc_std": 0.0041633319989322695,
+      "train_time_s_mean": 7.57446963332283
+    },
+    "rel_norm_v0.00": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.786,
+      "test_acc_std": 0.004358898943540678,
+      "val_acc_mean": 0.7866666666666667,
+      "val_acc_std": 0.0011547005383792525,
+      "train_time_s_mean": 10.248601833329303
+    },
+    "rel_norm_v0.30": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.779,
+      "test_acc_std": 0.009539392014169465,
+      "val_acc_mean": 0.7886666666666667,
+      "val_acc_std": 0.0041633319989322695,
+      "train_time_s_mean": 9.265366166674843
+    },
+    "rel_norm_v0.60": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.7823333333333333,
+      "test_acc_std": 0.0020816659994661348,
+      "val_acc_mean": 0.788,
+      "val_acc_std": 0.005291502622129186,
+      "train_time_s_mean": 9.12181293333803
+    },
+    "rel_norm_v0.90": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.7793333333333333,
+      "test_acc_std": 0.012503332889007379,
+      "val_acc_mean": 0.794,
+      "val_acc_std": 0.003464101615137758,
+      "train_time_s_mean": 9.783941266679903
+    }
+  },
+  "runs": [
+    {
+      "config": "baseline_gcn",
+      "seed": 0,
+      "best_val_acc": 0.796,
+      "test_acc_at_best_val": 0.791,
+      "train_time_s": 2.513159199996153
+    },
+    {
+      "config": "baseline_gcn",
+      "seed": 1,
+      "best_val_acc": 0.794,
+      "test_acc_at_best_val": 0.782,
+      "train_time_s": 2.0036660000041593
+    },
+    {
+      "config": "baseline_gcn",
+      "seed": 2,
+      "best_val_acc": 0.79,
+      "test_acc_at_best_val": 0.783,
+      "train_time_s": 1.893096699990565
+    },
+    {
+      "config": "baseline_sage",
+      "seed": 0,
+      "best_val_acc": 0.8,
+      "test_acc_at_best_val": 0.764,
+      "train_time_s": 2.6254208000027575
+    },
+    {
+      "config": "baseline_sage",
+      "seed": 1,
+      "best_val_acc": 0.802,
+      "test_acc_at_best_val": 0.768,
+      "train_time_s": 2.650686400011182
+    },
+    {
+      "config": "baseline_sage",
+      "seed": 2,
+      "best_val_acc": 0.804,
+      "test_acc_at_best_val": 0.77,
+      "train_time_s": 2.7863998000102583
+    },
+    {
+      "config": "relativistic_v0.00",
+      "seed": 0,
+      "best_val_acc": 0.786,
+      "test_acc_at_best_val": 0.768,
+      "train_time_s": 7.850310000008903
+    },
+    {
+      "config": "relativistic_v0.00",
+      "seed": 1,
+      "best_val_acc": 0.792,
+      "test_acc_at_best_val": 0.781,
+      "train_time_s": 8.326360099978046
+    },
+    {
+      "config": "relativistic_v0.00",
+      "seed": 2,
+      "best_val_acc": 0.786,
+      "test_acc_at_best_val": 0.782,
+      "train_time_s": 7.883417200006079
+    },
+    {
+      "config": "relativistic_v0.30",
+      "seed": 0,
+      "best_val_acc": 0.782,
+      "test_acc_at_best_val": 0.749,
+      "train_time_s": 8.272410300007323
+    },
+    {
+      "config": "relativistic_v0.30",
+      "seed": 1,
+      "best_val_acc": 0.798,
+      "test_acc_at_best_val": 0.77,
+      "train_time_s": 7.662717600003816
+    },
+    {
+      "config": "relativistic_v0.30",
+      "seed": 2,
+      "best_val_acc": 0.798,
+      "test_acc_at_best_val": 0.767,
+      "train_time_s": 7.2843564999930095
+    },
+    {
+      "config": "relativistic_v0.60",
+      "seed": 0,
+      "best_val_acc": 0.784,
+      "test_acc_at_best_val": 0.771,
+      "train_time_s": 8.000084600003902
+    },
+    {
+      "config": "relativistic_v0.60",
+      "seed": 1,
+      "best_val_acc": 0.786,
+      "test_acc_at_best_val": 0.763,
+      "train_time_s": 7.6302308999875095
+    },
+    {
+      "config": "relativistic_v0.60",
+      "seed": 2,
+      "best_val_acc": 0.782,
+      "test_acc_at_best_val": 0.754,
+      "train_time_s": 8.234375
+    },
+    {
+      "config": "relativistic_v0.90",
+      "seed": 0,
+      "best_val_acc": 0.786,
+      "test_acc_at_best_val": 0.769,
+      "train_time_s": 7.920441399997799
+    },
+    {
+      "config": "relativistic_v0.90",
+      "seed": 1,
+      "best_val_acc": 0.792,
+      "test_acc_at_best_val": 0.755,
+      "train_time_s": 7.645519599987892
+    },
+    {
+      "config": "relativistic_v0.90",
+      "seed": 2,
+      "best_val_acc": 0.794,
+      "test_acc_at_best_val": 0.773,
+      "train_time_s": 7.157447899982799
+    },
+    {
+      "config": "rel_norm_v0.00",
+      "seed": 0,
+      "best_val_acc": 0.788,
+      "test_acc_at_best_val": 0.789,
+      "train_time_s": 10.685685300006298
+    },
+    {
+      "config": "rel_norm_v0.00",
+      "seed": 1,
+      "best_val_acc": 0.786,
+      "test_acc_at_best_val": 0.788,
+      "train_time_s": 10.554944200004684
+    },
+    {
+      "config": "rel_norm_v0.00",
+      "seed": 2,
+      "best_val_acc": 0.786,
+      "test_acc_at_best_val": 0.781,
+      "train_time_s": 9.505175999976927
+    },
+    {
+      "config": "rel_norm_v0.30",
+      "seed": 0,
+      "best_val_acc": 0.792,
+      "test_acc_at_best_val": 0.788,
+      "train_time_s": 9.37317050001002
+    },
+    {
+      "config": "rel_norm_v0.30",
+      "seed": 1,
+      "best_val_acc": 0.79,
+      "test_acc_at_best_val": 0.78,
+      "train_time_s": 9.194961700006388
+    },
+    {
+      "config": "rel_norm_v0.30",
+      "seed": 2,
+      "best_val_acc": 0.784,
+      "test_acc_at_best_val": 0.769,
+      "train_time_s": 9.22796630000812
+    },
+    {
+      "config": "rel_norm_v0.60",
+      "seed": 0,
+      "best_val_acc": 0.794,
+      "test_acc_at_best_val": 0.783,
+      "train_time_s": 9.202575500006787
+    },
+    {
+      "config": "rel_norm_v0.60",
+      "seed": 1,
+      "best_val_acc": 0.786,
+      "test_acc_at_best_val": 0.784,
+      "train_time_s": 9.274325500009581
+    },
+    {
+      "config": "rel_norm_v0.60",
+      "seed": 2,
+      "best_val_acc": 0.784,
+      "test_acc_at_best_val": 0.78,
+      "train_time_s": 8.88853779999772
+    },
+    {
+      "config": "rel_norm_v0.90",
+      "seed": 0,
+      "best_val_acc": 0.796,
+      "test_acc_at_best_val": 0.785,
+      "train_time_s": 9.172249499999452
+    },
+    {
+      "config": "rel_norm_v0.90",
+      "seed": 1,
+      "best_val_acc": 0.796,
+      "test_acc_at_best_val": 0.765,
+      "train_time_s": 9.891189200017834
+    },
+    {
+      "config": "rel_norm_v0.90",
+      "seed": 2,
+      "best_val_acc": 0.79,
+      "test_acc_at_best_val": 0.788,
+      "train_time_s": 10.288385100022424
+    }
+  ]
+}

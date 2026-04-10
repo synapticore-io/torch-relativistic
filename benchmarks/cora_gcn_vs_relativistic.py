@@ -219,8 +219,11 @@ class BenchmarkConfig:
     )
 
 
-def run(cfg: BenchmarkConfig, dataset_root: Path, device: torch.device) -> list[RunResult]:
-    dataset = Planetoid(root=str(dataset_root), name="Cora")
+def run(cfg: BenchmarkConfig, dataset_root: Path, device: torch.device, dataset_name: str = "Cora") -> list[RunResult]:
+    print(f"\n{'='*60}")
+    print(f" Dataset: {dataset_name}")
+    print(f"{'='*60}")
+    dataset = Planetoid(root=str(dataset_root), name=dataset_name)
     data = dataset[0]
     in_ch = dataset.num_node_features
     out_ch = dataset.num_classes
@@ -300,8 +303,59 @@ def write_markdown(summary: dict[str, dict[str, float]], path: Path) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_combined_chart(
+    all_summaries: dict[str, dict[str, dict[str, float]]], path: Path
+) -> None:
+    """Generate a grouped bar chart comparing key configs across datasets."""
+    import plotly.graph_objects as go
+
+    # Show only the most interesting configs
+    key_configs = ["baseline_gcn", "baseline_sage", "rel_norm_v0.00", "rel_norm_v0.30", "rel_norm_v0.90"]
+    config_labels = {
+        "baseline_gcn": "GCNConv",
+        "baseline_sage": "SAGEConv",
+        "rel_norm_v0.00": "Rel. norm v=0",
+        "rel_norm_v0.30": "Rel. norm v=0.3",
+        "rel_norm_v0.90": "Rel. norm v=0.9",
+    }
+
+    fig = go.Figure()
+    for config in key_configs:
+        accs = []
+        stds = []
+        datasets = []
+        for ds_name, summary in all_summaries.items():
+            if config in summary:
+                accs.append(summary[config]["test_acc_mean"] * 100)
+                stds.append(summary[config]["test_acc_std"] * 100)
+                datasets.append(ds_name)
+        fig.add_trace(go.Bar(
+            name=config_labels.get(config, config),
+            x=datasets,
+            y=accs,
+            error_y=dict(type="data", array=stds, visible=True),
+        ))
+
+    fig.update_layout(
+        barmode="group",
+        yaxis_title="Test Accuracy (%)",
+        xaxis_title="Dataset",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+        width=900,
+        height=500,
+        margin=dict(l=60, r=20, t=60, b=40),
+    )
+
+    fig.write_html(str(path.with_suffix(".html")), include_plotlyjs="cdn")
+    try:
+        fig.write_image(str(path.with_suffix(".png")), scale=2)
+    except Exception:
+        pass
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--datasets", nargs="+", default=["Cora", "CiteSeer", "PubMed"])
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--hidden", type=int, default=64)
     parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
@@ -329,47 +383,69 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    results = run(cfg, dataset_root, device)
-    summary = summarize(results)
+    all_summaries: dict[str, dict[str, dict[str, float]]] = {}
 
-    json_path = output_dir / "cora.json"
-    md_path = output_dir / "cora.md"
+    for ds_name in args.datasets:
+        results = run(cfg, dataset_root, device, dataset_name=ds_name)
+        summary = summarize(results)
+        all_summaries[ds_name] = summary
 
-    json_payload = {
-        "config": {
-            "hidden": cfg.hidden,
-            "epochs": cfg.epochs,
-            "lr": cfg.lr,
-            "weight_decay": cfg.weight_decay,
-            "dropout": cfg.dropout,
-            "seeds": cfg.seeds,
-            "velocities": cfg.relativistic_velocities,
-            "device": str(device),
-        },
-        "summary": summary,
-        "runs": [
-            {
-                "config": r.config,
-                "seed": r.seed,
-                "best_val_acc": r.best_val_acc,
-                "test_acc_at_best_val": r.test_acc_at_best_val,
-                "train_time_s": r.train_time_s,
-            }
-            for r in results
-        ],
-    }
-    json_path.write_text(json.dumps(json_payload, indent=2), encoding="utf-8")
-    write_markdown(summary, md_path)
+        ds_lower = ds_name.lower()
+        json_path = output_dir / f"{ds_lower}.json"
+        md_path = output_dir / f"{ds_lower}.md"
 
-    print()
-    print(f"Wrote {json_path}")
-    print(f"Wrote {md_path}")
-    print()
-    print("Summary:")
-    for name, s in summary.items():
-        print(
-            f"  {name:25s}  test={s['test_acc_mean']:.4f} ± {s['test_acc_std']:.4f}"
-        )
+        json_payload = {
+            "dataset": ds_name,
+            "config": {
+                "hidden": cfg.hidden,
+                "epochs": cfg.epochs,
+                "lr": cfg.lr,
+                "weight_decay": cfg.weight_decay,
+                "dropout": cfg.dropout,
+                "seeds": cfg.seeds,
+                "velocities": cfg.relativistic_velocities,
+                "device": str(device),
+            },
+            "summary": summary,
+            "runs": [
+                {
+                    "config": r.config,
+                    "seed": r.seed,
+                    "best_val_acc": r.best_val_acc,
+                    "test_acc_at_best_val": r.test_acc_at_best_val,
+                    "train_time_s": r.train_time_s,
+                }
+                for r in results
+            ],
+        }
+        json_path.write_text(json.dumps(json_payload, indent=2), encoding="utf-8")
+        write_markdown(summary, md_path)
+        print(f"\nWrote {json_path}")
+        print(f"Wrote {md_path}")
+
+    # Combined comparison chart
+    if len(all_summaries) > 1:
+        chart_path = output_dir / "comparison"
+        write_combined_chart(all_summaries, chart_path)
+        print(f"\nWrote {chart_path}.html / .png")
+
+    # Final cross-dataset summary
+    print(f"\n{'='*70}")
+    print(" CROSS-DATASET SUMMARY")
+    print(f"{'='*70}")
+    key_configs = ["baseline_gcn", "baseline_sage", "rel_norm_v0.00", "rel_norm_v0.30"]
+    header = f"{'Config':25s}" + "".join(f" | {ds:>12s}" for ds in all_summaries.keys())
+    print(header)
+    print("-" * len(header))
+    for config in key_configs:
+        row = f"{config:25s}"
+        for ds_name, summary in all_summaries.items():
+            if config in summary:
+                s = summary[config]
+                row += f" | {s['test_acc_mean']*100:5.1f}±{s['test_acc_std']*100:.1f}%"
+            else:
+                row += f" | {'N/A':>12s}"
+        print(row)
 
 
 if __name__ == "__main__":

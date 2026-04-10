@@ -1,0 +1,316 @@
+{
+  "dataset": "CiteSeer",
+  "config": {
+    "hidden": 64,
+    "epochs": 200,
+    "lr": 0.01,
+    "weight_decay": 0.0005,
+    "dropout": 0.5,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "velocities": [
+      0.0,
+      0.3,
+      0.6,
+      0.9
+    ],
+    "device": "cuda"
+  },
+  "summary": {
+    "baseline_gcn": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6876666666666666,
+      "test_acc_std": 0.0070237691685684405,
+      "val_acc_mean": 0.7013333333333333,
+      "val_acc_std": 0.005033222956847171,
+      "train_time_s_mean": 1.4510232999940247
+    },
+    "baseline_sage": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6946666666666667,
+      "test_acc_std": 0.0015275252316519481,
+      "val_acc_mean": 0.7026666666666667,
+      "val_acc_std": 0.0061101009266077925,
+      "train_time_s_mean": 3.055445600000288
+    },
+    "relativistic_v0.00": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6183333333333333,
+      "test_acc_std": 0.011372481406154664,
+      "val_acc_mean": 0.6466666666666667,
+      "val_acc_std": 0.007571877794400371,
+      "train_time_s_mean": 5.4144255000185995
+    },
+    "relativistic_v0.30": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6313333333333333,
+      "test_acc_std": 0.014571661996262942,
+      "val_acc_mean": 0.6493333333333333,
+      "val_acc_std": 0.00461880215351701,
+      "train_time_s_mean": 5.330301933339797
+    },
+    "relativistic_v0.60": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6276666666666667,
+      "test_acc_std": 0.002309401076758505,
+      "val_acc_mean": 0.6486666666666667,
+      "val_acc_std": 0.002309401076758505,
+      "train_time_s_mean": 5.517546899995068
+    },
+    "relativistic_v0.90": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.638,
+      "test_acc_std": 0.014177446878757837,
+      "val_acc_mean": 0.6506666666666667,
+      "val_acc_std": 0.005773502691896263,
+      "train_time_s_mean": 5.847322566667572
+    },
+    "rel_norm_v0.00": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6916666666666667,
+      "test_acc_std": 0.006658328118479352,
+      "val_acc_mean": 0.6966666666666667,
+      "val_acc_std": 0.0041633319989322695,
+      "train_time_s_mean": 7.897927233328422
+    },
+    "rel_norm_v0.30": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6880000000000001,
+      "test_acc_std": 0.008717797887081291,
+      "val_acc_mean": 0.7006666666666667,
+      "val_acc_std": 0.008082903768654767,
+      "train_time_s_mean": 7.636633066673919
+    },
+    "rel_norm_v0.60": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6986666666666667,
+      "test_acc_std": 0.00838649708360609,
+      "val_acc_mean": 0.704,
+      "val_acc_std": 0.010392304845413272,
+      "train_time_s_mean": 7.7629302666464355
+    },
+    "rel_norm_v0.90": {
+      "n_seeds": 3,
+      "test_acc_mean": 0.6953333333333334,
+      "test_acc_std": 0.014047538337136945,
+      "val_acc_mean": 0.704,
+      "val_acc_std": 0.01216552506059645,
+      "train_time_s_mean": 7.660474333339759
+    }
+  },
+  "runs": [
+    {
+      "config": "baseline_gcn",
+      "seed": 0,
+      "best_val_acc": 0.696,
+      "test_acc_at_best_val": 0.681,
+      "train_time_s": 1.596864099992672
+    },
+    {
+      "config": "baseline_gcn",
+      "seed": 1,
+      "best_val_acc": 0.706,
+      "test_acc_at_best_val": 0.695,
+      "train_time_s": 1.3961806999868713
+    },
+    {
+      "config": "baseline_gcn",
+      "seed": 2,
+      "best_val_acc": 0.702,
+      "test_acc_at_best_val": 0.687,
+      "train_time_s": 1.360025100002531
+    },
+    {
+      "config": "baseline_sage",
+      "seed": 0,
+      "best_val_acc": 0.708,
+      "test_acc_at_best_val": 0.695,
+      "train_time_s": 2.333715699991444
+    },
+    {
+      "config": "baseline_sage",
+      "seed": 1,
+      "best_val_acc": 0.704,
+      "test_acc_at_best_val": 0.693,
+      "train_time_s": 2.280288499983726
+    },
+    {
+      "config": "baseline_sage",
+      "seed": 2,
+      "best_val_acc": 0.696,
+      "test_acc_at_best_val": 0.696,
+      "train_time_s": 4.552332600025693
+    },
+    {
+      "config": "relativistic_v0.00",
+      "seed": 0,
+      "best_val_acc": 0.65,
+      "test_acc_at_best_val": 0.615,
+      "train_time_s": 5.380235500022536
+    },
+    {
+      "config": "relativistic_v0.00",
+      "seed": 1,
+      "best_val_acc": 0.638,
+      "test_acc_at_best_val": 0.609,
+      "train_time_s": 5.516116100014187
+    },
+    {
+      "config": "relativistic_v0.00",
+      "seed": 2,
+      "best_val_acc": 0.652,
+      "test_acc_at_best_val": 0.631,
+      "train_time_s": 5.346924900019076
+    },
+    {
+      "config": "relativistic_v0.30",
+      "seed": 0,
+      "best_val_acc": 0.652,
+      "test_acc_at_best_val": 0.615,
+      "train_time_s": 5.329161600006046
+    },
+    {
+      "config": "relativistic_v0.30",
+      "seed": 1,
+      "best_val_acc": 0.644,
+      "test_acc_at_best_val": 0.643,
+      "train_time_s": 5.320625899999868
+    },
+    {
+      "config": "relativistic_v0.30",
+      "seed": 2,
+      "best_val_acc": 0.652,
+      "test_acc_at_best_val": 0.636,
+      "train_time_s": 5.341118300013477
+    },
+    {
+      "config": "relativistic_v0.60",
+      "seed": 0,
+      "best_val_acc": 0.65,
+      "test_acc_at_best_val": 0.625,
+      "train_time_s": 5.334073999983957
+    },
+    {
+      "config": "relativistic_v0.60",
+      "seed": 1,
+      "best_val_acc": 0.65,
+      "test_acc_at_best_val": 0.629,
+      "train_time_s": 5.553408899984788
+    },
+    {
+      "config": "relativistic_v0.60",
+      "seed": 2,
+      "best_val_acc": 0.646,
+      "test_acc_at_best_val": 0.629,
+      "train_time_s": 5.665157800016459
+    },
+    {
+      "config": "relativistic_v0.90",
+      "seed": 0,
+      "best_val_acc": 0.654,
+      "test_acc_at_best_val": 0.627,
+      "train_time_s": 5.653511099983007
+    },
+    {
+      "config": "relativistic_v0.90",
+      "seed": 1,
+      "best_val_acc": 0.654,
+      "test_acc_at_best_val": 0.654,
+      "train_time_s": 5.9626195000018924
+    },
+    {
+      "config": "relativistic_v0.90",
+      "seed": 2,
+      "best_val_acc": 0.644,
+      "test_acc_at_best_val": 0.633,
+      "train_time_s": 5.925837100017816
+    },
+    {
+      "config": "rel_norm_v0.00",
+      "seed": 0,
+      "best_val_acc": 0.692,
+      "test_acc_at_best_val": 0.686,
+      "train_time_s": 8.147641799994744
+    },
+    {
+      "config": "rel_norm_v0.00",
+      "seed": 1,
+      "best_val_acc": 0.698,
+      "test_acc_at_best_val": 0.69,
+      "train_time_s": 7.69909949999419
+    },
+    {
+      "config": "rel_norm_v0.00",
+      "seed": 2,
+      "best_val_acc": 0.7,
+      "test_acc_at_best_val": 0.699,
+      "train_time_s": 7.847040399996331
+    },
+    {
+      "config": "rel_norm_v0.30",
+      "seed": 0,
+      "best_val_acc": 0.692,
+      "test_acc_at_best_val": 0.682,
+      "train_time_s": 7.725536900019506
+    },
+    {
+      "config": "rel_norm_v0.30",
+      "seed": 1,
+      "best_val_acc": 0.702,
+      "test_acc_at_best_val": 0.698,
+      "train_time_s": 7.512701900006505
+    },
+    {
+      "config": "rel_norm_v0.30",
+      "seed": 2,
+      "best_val_acc": 0.708,
+      "test_acc_at_best_val": 0.684,
+      "train_time_s": 7.671660399995744
+    },
+    {
+      "config": "rel_norm_v0.60",
+      "seed": 0,
+      "best_val_acc": 0.698,
+      "test_acc_at_best_val": 0.704,
+      "train_time_s": 7.872834599984344
+    },
+    {
+      "config": "rel_norm_v0.60",
+      "seed": 1,
+      "best_val_acc": 0.716,
+      "test_acc_at_best_val": 0.703,
+      "train_time_s": 7.821899899980053
+    },
+    {
+      "config": "rel_norm_v0.60",
+      "seed": 2,
+      "best_val_acc": 0.698,
+      "test_acc_at_best_val": 0.689,
+      "train_time_s": 7.594056299974909
+    },
+    {
+      "config": "rel_norm_v0.90",
+      "seed": 0,
+      "best_val_acc": 0.696,
+      "test_acc_at_best_val": 0.682,
+      "train_time_s": 7.427762499981327
+    },
+    {
+      "config": "rel_norm_v0.90",
+      "seed": 1,
+      "best_val_acc": 0.718,
+      "test_acc_at_best_val": 0.71,
+      "train_time_s": 7.740626100014197
+    },
+    {
+      "config": "rel_norm_v0.90",
+      "seed": 2,
+      "best_val_acc": 0.698,
+      "test_acc_at_best_val": 0.694,
+      "train_time_s": 7.813034400023753
+    }
+  ]
+}

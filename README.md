@@ -31,9 +31,9 @@
 **torch-relativistic** provides neural network modules that incorporate concepts from **special relativity** into
 machine learning. The core idea is that the **Terrell-Penrose effect** — where rapidly moving objects appear rotated
 rather than contracted — can serve as a physics-motivated inductive bias for learned feature transformations.
-In an initial Cora node-classification benchmark (3 seeds, 2708 nodes),
-`RelativisticGraphConv` with `normalize=True` outperforms stock `GCNConv`
-by +1.6pp — see the [full results and interpretation](benchmarks/results/cora.md).
+Across the standard Planetoid benchmarks (Cora, CiteSeer, PubMed),
+`RelativisticGraphConv` with `normalize=True` is consistently competitive
+with stock `GCNConv` — see the [full results](benchmarks/results/).
 
 ### 🎯 Key Features
 
@@ -119,35 +119,39 @@ outcomes are all worth reporting:
 This repository ships the architecture and the tooling. It does not claim
 empirical superiority that has not yet been measured.
 
-### 📊 Benchmark (Cora, node classification)
+### 📊 Benchmarks (Planetoid node classification, 3 seeds)
 
-| Config | Test accuracy (mean ± std, 3 seeds) |
-|---|---|
-| `GCNConv` baseline | 0.8017 ± 0.0076 |
-| `SAGEConv` baseline | 0.8093 ± 0.0050 |
-| **`RelativisticGraphConv` `normalize=True` `v=0.00`** | **0.8180 ± 0.0020** |
-| `RelativisticGraphConv` `normalize=True` `v=0.30` | 0.8153 ± 0.0047 |
-| `RelativisticGraphConv` `normalize=True` `v=0.60` | 0.8140 ± 0.0060 |
-| `RelativisticGraphConv` `normalize=True` `v=0.90` | 0.8077 ± 0.0068 |
-| `RelativisticGraphConv` (no norm) `v=0.00` | 0.7530 ± 0.0203 |
+<p align="center">
+  <img src="benchmarks/results/comparison.png" alt="Benchmark comparison across Cora, CiteSeer, PubMed" width="80%">
+</p>
 
-With `normalize=True` (which applies GCN-style `D⁻¹ᐟ² A D⁻¹ᐟ²` edge
-normalization), `RelativisticGraphConv` **outperforms both `GCNConv`
-(+1.63 pp) and `SAGEConv` (+0.87 pp)** on Cora at `max_velocity=0.0`.
-The gain is consistent (std = 0.20%) and comes primarily from the
-architecture's in-message linear transform and position-aware weighting,
-not from the velocity parameter itself (which slightly degrades at
-higher values on this dataset).
+| Config | Cora | CiteSeer | PubMed |
+|---|---|---|---|
+| `GCNConv` | 81.2 ± 0.7% | 68.8 ± 0.7% | **78.5 ± 0.5%** |
+| `SAGEConv` | 80.7 ± 0.5% | **69.5 ± 0.2%** | 76.7 ± 0.3% |
+| **`Rel. norm v=0`** | **81.7 ± 0.1%** | 69.2 ± 0.7% | **78.6 ± 0.4%** |
+| `Rel. norm v=0.3` | 80.4 ± 1.1% | 68.8 ± 0.9% | 77.9 ± 1.0% |
 
-Without normalization, performance drops to ~75%, confirming that fair
-comparisons require matching the normalization scheme. See
-[`benchmarks/results/cora.md`](benchmarks/results/cora.md) for the full
-analysis, interpretation, and planned follow-ups.
+`RelativisticGraphConv` with `normalize=True` at `max_velocity=0` is
+**consistently competitive with standard GCNConv** across all three
+Planetoid datasets, with a small edge on Cora (+0.5pp with the lowest
+variance of any config) and near-parity on PubMed. On CiteSeer all
+methods are within noise of each other.
 
-**Key takeaway for users**: use `normalize=True` with low `max_velocity`
-as the default. The velocity knob becomes more interesting on tasks with
-intrinsic spatial structure (point clouds, molecular graphs) — those
-benchmarks are next.
+The gain comes from the architecture's in-message linear transform and
+position-aware weighting — not from the velocity parameter, which
+provides no benefit on these homophilic citation graphs. The velocity
+knob is expected to become more relevant on tasks with intrinsic spatial
+structure (point clouds, molecular graphs).
+
+Without `normalize=True`, performance drops to ~75% on Cora, confirming
+that fair comparisons require matching the normalization scheme.
+
+See [`benchmarks/results/`](benchmarks/results/) for per-dataset tables,
+raw JSON results, and the full interpretation.
+
+**Key takeaway for users**: use `normalize=True` with `max_velocity=0`
+as the default on homophilic graphs.
 
 ---
 
