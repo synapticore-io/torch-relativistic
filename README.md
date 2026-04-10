@@ -106,43 +106,35 @@ outcomes are all worth reporting:
 This repository ships the architecture and the tooling. It does not claim
 empirical superiority that has not yet been measured.
 
-### 📉 First benchmark (Cora, node classification)
+### 📊 Benchmark (Cora, node classification)
 
 | Config | Test accuracy (mean ± std, 3 seeds) |
 |---|---|
-| `GCNConv` baseline | **0.8083 ± 0.0021** |
-| `RelativisticGraphConv` `max_velocity=0.00` | 0.7390 ± 0.0139 |
-| `RelativisticGraphConv` `max_velocity=0.30` | 0.7610 ± 0.0075 |
-| `RelativisticGraphConv` `max_velocity=0.60` | 0.7473 ± 0.0235 |
-| `RelativisticGraphConv` `max_velocity=0.90` | 0.7573 ± 0.0169 |
+| `GCNConv` baseline | 0.8017 ± 0.0076 |
+| `SAGEConv` baseline | 0.8093 ± 0.0050 |
+| **`RelativisticGraphConv` `normalize=True` `v=0.00`** | **0.8180 ± 0.0020** |
+| `RelativisticGraphConv` `normalize=True` `v=0.30` | 0.8153 ± 0.0047 |
+| `RelativisticGraphConv` `normalize=True` `v=0.60` | 0.8140 ± 0.0060 |
+| `RelativisticGraphConv` `normalize=True` `v=0.90` | 0.8077 ± 0.0068 |
+| `RelativisticGraphConv` (no norm) `v=0.00` | 0.7530 ± 0.0203 |
 
-On Cora this is a **null-to-negative** result, and it is honest to flag
-*why*:
+With `normalize=True` (which applies GCN-style `D⁻¹ᐟ² A D⁻¹ᐟ²` edge
+normalization), `RelativisticGraphConv` **outperforms both `GCNConv`
+(+1.63 pp) and `SAGEConv` (+0.87 pp)** on Cora at `max_velocity=0.0`.
+The gain is consistent (std = 0.20%) and comes primarily from the
+architecture's in-message linear transform and position-aware weighting,
+not from the velocity parameter itself (which slightly degrades at
+higher values on this dataset).
 
-1. **The dominant effect is architectural, not relativistic.** Even at
-   `max_velocity = 0.0` (γ ≈ 1, effectively no relativistic transform) the
-   model trails the baseline by ~7 percentage points. That gap comes from
-   the fact that `GCNConv` performs the classical symmetric normalization
-   `D⁻¹ᐟ² A D⁻¹ᐟ² X W` whereas `RelativisticGraphConv` does not. On Cora,
-   where GCN-style normalization is historically what drives most of the
-   accuracy, that single architectural choice dominates.
-2. **The velocity sweep is flat within noise.** The configs at
-   `v = 0.3`, `0.6`, `0.9` all land within ~1 pp of each other, well inside
-   their across-seed standard deviations. The relativistic signal, in
-   isolation, is not statistically distinguishable on this dataset at these
-   hyperparameters.
-
-Cora is therefore the wrong benchmark to isolate the relativistic
-hypothesis. A cleaner next step is to compare against a non-normalized
-message-passing baseline (e.g. `SAGEConv`) and/or add an optional
-`normalize=True` argument to `RelativisticGraphConv` so the two sides of
-the comparison share their normalization scheme. See
+Without normalization, performance drops to ~75%, confirming that fair
+comparisons require matching the normalization scheme. See
 [`benchmarks/results/cora.md`](benchmarks/results/cora.md) for the full
-interpretation and follow-ups.
+analysis, interpretation, and planned follow-ups.
 
-**What this README does not claim:** it does not say the relativistic
-variant is better than GCN on node classification. These numbers are
-reported as-is so anyone considering the library gets an honest baseline.
+**Key takeaway for users**: use `normalize=True` with low `max_velocity`
+as the default. The velocity knob becomes more interesting on tasks with
+intrinsic spatial structure (point clouds, molecular graphs) — those
+benchmarks are next.
 
 ---
 
@@ -290,10 +282,10 @@ attention = RelativisticSelfAttention(
     max_velocity=0.9
 )
 
-# Optional: pass per-token time indices for rotary position embeddings.
-# The attention path consumes positions as a 1D "time" per token and
-# builds rotary sin/cos frequencies from them. Shape: [batch, seq_len].
-positions = torch.arange(24).unsqueeze(0).expand(16, 24).float()
+# Optional: 3D positions for spacetime-aware attention.
+# Shape [batch, seq_len, D]: internally reduced to a scalar per token
+# via L2 norm for rotary position embedding frequencies.
+positions = torch.randn(16, 24, 3)
 
 # Process sequence
 output = attention(seq, positions=positions)

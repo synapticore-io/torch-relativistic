@@ -16,6 +16,28 @@ from torch import Tensor
 from .utils import calculate_gamma, clamp_velocity, calculate_delay_factors
 
 
+class _SurrogateSpike(torch.autograd.Function):
+    """Hard threshold in forward, fast-sigmoid surrogate gradient in backward."""
+
+    @staticmethod
+    def forward(ctx, membrane_potential, grad_scale):
+        ctx.save_for_backward(grad_scale)
+        return (membrane_potential > 0).float()
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        (grad_scale,) = ctx.saved_tensors
+        return grad_output * grad_scale, None
+
+
+def surrogate_spike(potential: Tensor, threshold: float, scale: float = 10.0) -> Tensor:
+    """Generate binary spikes with a differentiable surrogate gradient."""
+    shifted = potential - threshold
+    sigmoid = torch.sigmoid(shifted * scale)
+    grad_scale = sigmoid * (1 - sigmoid) * scale
+    return _SurrogateSpike.apply(shifted, grad_scale)
+
+
 class RelativisticLIFNeuron(nn.Module):
     """
     Leaky Integrate-and-Fire neuron with relativistic time effects.
@@ -92,8 +114,8 @@ class RelativisticLIFNeuron(nn.Module):
         # Standard LIF dynamics
         new_potential = prev_potential * self.beta + torch.sum(effective_inputs, dim=1)
 
-        # Spike generation
-        new_spikes = (new_potential > self.threshold).float()
+        # Spike generation with surrogate gradient for differentiability
+        new_spikes = surrogate_spike(new_potential, self.threshold)
 
         # Reset potential after spike
         new_potential = new_potential * (1.0 - new_spikes)

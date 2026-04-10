@@ -41,7 +41,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.datasets import Planetoid
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, SAGEConv
 
 from torch_relativistic.gnn import RelativisticGraphConv
 
@@ -52,7 +52,7 @@ from torch_relativistic.gnn import RelativisticGraphConv
 
 
 class BaselineGCN(nn.Module):
-    """Stock 2-layer GCNConv network."""
+    """Stock 2-layer GCNConv network (edge-normalized)."""
 
     def __init__(self, in_channels: int, hidden: int, out_channels: int, dropout: float = 0.5):
         super().__init__()
@@ -68,8 +68,25 @@ class BaselineGCN(nn.Module):
         return x
 
 
+class BaselineSAGE(nn.Module):
+    """Stock 2-layer SAGEConv network (non-normalized — fairer baseline)."""
+
+    def __init__(self, in_channels: int, hidden: int, out_channels: int, dropout: float = 0.5):
+        super().__init__()
+        self.conv1 = SAGEConv(in_channels, hidden)
+        self.conv2 = SAGEConv(hidden, out_channels)
+        self.dropout = dropout
+
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        x = self.conv1(x, edge_index)
+        x = F.relu(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.conv2(x, edge_index)
+        return x
+
+
 class RelativisticGCN(nn.Module):
-    """Same architecture with RelativisticGraphConv layers."""
+    """RelativisticGraphConv layers (no edge normalization)."""
 
     def __init__(
         self,
@@ -85,6 +102,34 @@ class RelativisticGCN(nn.Module):
         )
         self.conv2 = RelativisticGraphConv(
             hidden, out_channels, max_relative_velocity=max_velocity
+        )
+        self.dropout = dropout
+
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        x = self.conv1(x, edge_index)
+        x = F.relu(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.conv2(x, edge_index)
+        return x
+
+
+class RelativisticNormGCN(nn.Module):
+    """RelativisticGraphConv with normalize=True (fair comparison to GCN)."""
+
+    def __init__(
+        self,
+        in_channels: int,
+        hidden: int,
+        out_channels: int,
+        max_velocity: float,
+        dropout: float = 0.5,
+    ):
+        super().__init__()
+        self.conv1 = RelativisticGraphConv(
+            in_channels, hidden, max_relative_velocity=max_velocity, normalize=True
+        )
+        self.conv2 = RelativisticGraphConv(
+            hidden, out_channels, max_relative_velocity=max_velocity, normalize=True
         )
         self.dropout = dropout
 
@@ -182,37 +227,28 @@ def run(cfg: BenchmarkConfig, dataset_root: Path, device: torch.device) -> list[
 
     results: list[RunResult] = []
 
-    # Baseline
-    for seed in cfg.seeds:
-        set_seed(seed)
-        model = BaselineGCN(in_ch, cfg.hidden, out_ch, cfg.dropout)
-        t0 = time.perf_counter()
-        best_val, test_at_best = train_and_evaluate(
-            model, data, device, cfg.epochs, cfg.lr, cfg.weight_decay
-        )
-        dt = time.perf_counter() - t0
-        results.append(
-            RunResult("baseline_gcn", seed, best_val, test_at_best, dt)
-        )
-        print(
-            f"[baseline_gcn] seed={seed}  val={best_val:.4f}  test={test_at_best:.4f}  ({dt:.1f}s)"
-        )
-
-    # Relativistic variants
-    for v in cfg.relativistic_velocities:
-        name = f"relativistic_v{v:.2f}"
+    def _bench(name: str, model: nn.Module) -> None:
         for seed in cfg.seeds:
             set_seed(seed)
-            model = RelativisticGCN(in_ch, cfg.hidden, out_ch, v, cfg.dropout)
             t0 = time.perf_counter()
             best_val, test_at_best = train_and_evaluate(
                 model, data, device, cfg.epochs, cfg.lr, cfg.weight_decay
             )
             dt = time.perf_counter() - t0
             results.append(RunResult(name, seed, best_val, test_at_best, dt))
-            print(
-                f"[{name}] seed={seed}  val={best_val:.4f}  test={test_at_best:.4f}  ({dt:.1f}s)"
-            )
+            print(f"[{name}] seed={seed}  val={best_val:.4f}  test={test_at_best:.4f}  ({dt:.1f}s)")
+
+    # Baselines
+    _bench("baseline_gcn", BaselineGCN(in_ch, cfg.hidden, out_ch, cfg.dropout))
+    _bench("baseline_sage", BaselineSAGE(in_ch, cfg.hidden, out_ch, cfg.dropout))
+
+    # Relativistic variants (no edge normalization)
+    for v in cfg.relativistic_velocities:
+        _bench(f"relativistic_v{v:.2f}", RelativisticGCN(in_ch, cfg.hidden, out_ch, v, cfg.dropout))
+
+    # Relativistic variants WITH GCN-style normalization (fair comparison to GCN)
+    for v in cfg.relativistic_velocities:
+        _bench(f"rel_norm_v{v:.2f}", RelativisticNormGCN(in_ch, cfg.hidden, out_ch, v, cfg.dropout))
 
     return results
 

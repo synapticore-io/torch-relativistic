@@ -14,24 +14,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
+from torch_geometric.nn import MessagePassing
+from torch_geometric.nn.conv.gcn_conv import gcn_norm
+
 from .utils import calculate_gamma, clamp_velocity
 
-# For PyTorch Geometric compatibility - gracefully handle if not available
-try:
-    from torch_geometric.nn import MessagePassing
 
-    HAS_PYGEOMETRIC = True
-except ImportError:
-    HAS_PYGEOMETRIC = False
-
-
-class MessagePassingFallback(nn.Module):
-    def __init__(self, aggr="add"):
-        super().__init__()
-        self.aggr = aggr
-
-
-class RelativisticGraphConv((MessagePassing if HAS_PYGEOMETRIC else MessagePassingFallback)):  # type: ignore[misc]
+class RelativisticGraphConv(MessagePassing):
     """
     A graph convolutional layer that incorporates relativistic effects inspired by the Terrell-Penrose effect.
 
@@ -62,18 +51,14 @@ class RelativisticGraphConv((MessagePassing if HAS_PYGEOMETRIC else MessagePassi
         max_relative_velocity: float = 0.9,
         bias: bool = True,
         aggr: str = "add",
+        normalize: bool = False,
     ):
-        if HAS_PYGEOMETRIC:
-            super().__init__(aggr=aggr)
-        else:
-            super().__init__()
-            print(
-                "Warning: PyTorch Geometric not available. RelativisticGraphConv will use simplified implementation."
-            )
+        super().__init__(aggr=aggr)
 
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.max_relative_velocity = max_relative_velocity
+        self.normalize = normalize
 
         # Learnable parameters
         self.linear = nn.Linear(in_channels, out_channels, bias=bias)
@@ -113,14 +98,18 @@ class RelativisticGraphConv((MessagePassing if HAS_PYGEOMETRIC else MessagePassi
         if position is None:
             position = x[:, : min(3, x.size(1))]
 
-        if HAS_PYGEOMETRIC:
-            # Use PyTorch Geometric's MessagePassing machinery
-            return self.propagate(
-                edge_index, x=x, position=position, edge_attr=edge_attr
+        # Optional GCN-style symmetric normalization (D^-1/2 A D^-1/2)
+        edge_weight = None
+        if self.normalize:
+            edge_index, edge_weight = gcn_norm(
+                edge_index, edge_weight=None, num_nodes=x.size(0),
+                add_self_loops=True,
             )
-        else:
-            # Simplified implementation without PyTorch Geometric
-            return self._simplified_forward(x, edge_index, position, edge_attr)
+
+        return self.propagate(
+            edge_index, x=x, position=position, edge_attr=edge_attr,
+            edge_weight=edge_weight,
+        )
 
     def message(
         self,
@@ -128,6 +117,7 @@ class RelativisticGraphConv((MessagePassing if HAS_PYGEOMETRIC else MessagePassi
         position_i: Tensor,
         position_j: Tensor,
         edge_attr: Optional[Tensor] = None,
+        edge_weight: Optional[Tensor] = None,
     ) -> Tensor:
         """
         Compute messages between nodes in a relativistic framework.
@@ -137,6 +127,8 @@ class RelativisticGraphConv((MessagePassing if HAS_PYGEOMETRIC else MessagePassi
             position_i: Positions of the target nodes
             position_j: Positions of the source nodes
             edge_attr: Optional edge features
+            edge_weight: Optional per-edge normalization weight from gcn_norm
+                         (only present when normalize=True)
 
         Returns:
             Tensor: Relativistically transformed messages
@@ -158,6 +150,10 @@ class RelativisticGraphConv((MessagePassing if HAS_PYGEOMETRIC else MessagePassi
         messages = transformed_features * self._terrell_penrose_factor(
             delta_position, v_rel, gamma
         )
+
+        # Apply GCN-style edge normalization if enabled
+        if edge_weight is not None:
+            messages = messages * edge_weight.view(-1, 1)
 
         # Incorporate edge features if provided
         if edge_attr is not None:
@@ -195,68 +191,6 @@ class RelativisticGraphConv((MessagePassing if HAS_PYGEOMETRIC else MessagePassi
         )
 
         return aberration_factor
-
-    def _simplified_forward(
-        self,
-        x: Tensor,
-        edge_index: Tensor,
-        position: Tensor,
-        edge_attr: Optional[Tensor] = None,
-    ) -> Tensor:
-        """
-        Simplified implementation when PyTorch Geometric is not available.
-
-        Args:
-            x: Node features
-            edge_index: Graph connectivity
-            position: Node positions
-            edge_attr: Edge features
-
-        Returns:
-            Tensor: Updated node features
-        """
-        num_nodes = x.size(0)
-        src, dst = edge_index[0], edge_index[1]
-
-        # Create messages
-        x_j = x[src]
-        position_i = position[dst]
-        position_j = position[src]
-
-        # Calculate relativistic message
-        delta_position = position_j - position_i
-        distance = torch.norm(delta_position, dim=1, keepdim=True)
-
-        v_rel = self.velocity_factor * clamp_velocity(
-            distance / distance.max(), self.max_relative_velocity
-        )
-        gamma = calculate_gamma(v_rel)
-
-        transformed_features = self.linear(x_j)
-        direction = delta_position / (
-            torch.norm(delta_position, dim=1, keepdim=True) + 1e-8
-        )
-        aberration_factor = 1.0 / (
-            gamma * (1.0 + v_rel * torch.sum(direction, dim=1, keepdim=True))
-        )
-
-        messages = transformed_features * aberration_factor
-
-        if edge_attr is not None:
-            if edge_attr.dim() == 1:
-                messages = messages * edge_attr.unsqueeze(-1)
-            else:
-                messages = messages * edge_attr
-
-        # Manual aggregation (simplified version of scatter_add)
-        output = torch.zeros(num_nodes, self.out_channels, device=x.device)
-
-        # For each target node, sum the incoming messages
-        for i in range(len(dst)):
-            output[dst[i]] += messages[i]
-
-        return output
-
 
 class MultiObserverGNN(nn.Module):
     """

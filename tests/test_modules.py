@@ -94,6 +94,28 @@ class TestRelativisticGraphConv:
 
         assert torch.allclose(out_before, out_after)
 
+    def test_normalize_changes_output(self, sample):
+        """With normalize=True, GCN-style D^(-1/2) A D^(-1/2) is applied."""
+        x, edge_index = sample
+        torch.manual_seed(0)
+        conv_no_norm = RelativisticGraphConv(8, 16, max_relative_velocity=0.5, normalize=False)
+        torch.manual_seed(0)
+        conv_norm = RelativisticGraphConv(8, 16, max_relative_velocity=0.5, normalize=True)
+        out_no = conv_no_norm(x, edge_index)
+        out_yes = conv_norm(x, edge_index)
+        # Normalization adds self-loops and rescales — output shapes match
+        # but values must differ (because normalize changes the edge set)
+        assert out_no.shape[1] == out_yes.shape[1] == 16
+        # The two outputs should NOT be identical
+        assert not torch.allclose(out_no, out_yes, atol=1e-4)
+
+    def test_normalize_backward_finite(self, sample):
+        x, edge_index = sample
+        conv = RelativisticGraphConv(8, 16, max_relative_velocity=0.5, normalize=True)
+        out = conv(x, edge_index)
+        out.sum().backward()
+        _assert_finite_grads(conv)
+
 
 class TestMultiObserverGNN:
     def test_forward_shape(self):
@@ -142,16 +164,6 @@ class TestRelativisticLIFNeuron:
         # state should be the same structure
         assert type(new_state) is type(state)
 
-    @pytest.mark.xfail(
-        reason=(
-            "RelativisticLIFNeuron currently produces hard 0/1 spikes via "
-            "(v > threshold).float(), which is non-differentiable. A proper "
-            "SNN implementation would plug in a surrogate gradient (e.g. a "
-            "fast sigmoid backward pass while keeping the forward hard). "
-            "This test locks that in as a known limitation."
-        ),
-        strict=True,
-    )
     def test_backward_through_surrogate(self):
         torch.manual_seed(0)
         batch_size, input_size = 4, 10
@@ -218,16 +230,8 @@ class TestRelativisticSelfAttention:
         out.sum().backward()
         _assert_finite_grads(attn)
 
-    def test_forward_with_positions(self):
-        """
-        Note: the README currently documents `positions = torch.randn(16, 24, 3)`
-        but the code's rotary position embedding path expects `positions` to be
-        a 1D time index per token — either shape [batch, seq] or
-        [batch, seq, 1]. Passing the documented 3D form crashes in
-        `torch.outer(2D, 1D)`. This test uses the shape the code actually
-        supports and should be revisited once the README example is updated
-        (or the rotary path is generalized to accept a 3D spatial position).
-        """
+    def test_forward_with_1d_positions(self):
+        """Positions as [batch, seq] — scalar time indices."""
         torch.manual_seed(0)
         batch, seq, hidden = 2, 6, 16
         attn = RelativisticSelfAttention(
@@ -236,6 +240,18 @@ class TestRelativisticSelfAttention:
         seq_in = torch.randn(batch, seq, hidden)
         pos = torch.arange(seq).unsqueeze(0).expand(batch, seq).float()
         out = attn(seq_in, positions=pos)
+        assert out.shape == (batch, seq, hidden)
+
+    def test_forward_with_3d_positions(self):
+        """Positions as [batch, seq, 3] — 3D spatial positions, reduced via L2 norm."""
+        torch.manual_seed(0)
+        batch, seq, hidden = 2, 6, 16
+        attn = RelativisticSelfAttention(
+            hidden_dim=hidden, num_heads=4, dropout=0.0, max_velocity=0.9
+        )
+        seq_in = torch.randn(batch, seq, hidden)
+        pos_3d = torch.randn(batch, seq, 3)
+        out = attn(seq_in, positions=pos_3d)
         assert out.shape == (batch, seq, hidden)
 
 

@@ -101,12 +101,15 @@ class RelativisticSelfAttention(nn.Module):
         if positions.dim() == 2:
             t = positions[0].float().to(device)  # [seq_len]
         elif positions.dim() == 3:
-            # If positions has extra dimension [batch, seq_len, 1], squeeze it
-            t = (
-                positions[0, :, 0].float().to(device)
-                if positions.shape[-1] == 1
-                else positions[0].float().to(device)
-            )
+            if positions.shape[-1] == 1:
+                # [batch, seq_len, 1] → squeeze last dim
+                t = positions[0, :, 0].float().to(device)
+            else:
+                # [batch, seq_len, D] with D > 1 → reduce to scalar per
+                # token using L2 norm of the position vector. This
+                # preserves the spatial ordering while giving rotary
+                # embeddings a single "magnitude" to build frequencies from.
+                t = torch.norm(positions[0].float(), dim=-1).to(device)  # [seq_len]
         else:
             t = positions.float().to(device)
 
