@@ -47,8 +47,9 @@ class TestRelativisticGraphConv:
     @pytest.fixture
     def conv(self):
         torch.manual_seed(0)
-        return RelativisticGraphConv(in_channels=8, out_channels=16,
-                                     max_relative_velocity=0.8)
+        return RelativisticGraphConv(
+            in_channels=8, out_channels=16, max_relative_velocity=0.8
+        )
 
     @pytest.fixture
     def sample(self):
@@ -98,9 +99,13 @@ class TestRelativisticGraphConv:
         """With normalize=True, GCN-style D^(-1/2) A D^(-1/2) is applied."""
         x, edge_index = sample
         torch.manual_seed(0)
-        conv_no_norm = RelativisticGraphConv(8, 16, max_relative_velocity=0.5, normalize=False)
+        conv_no_norm = RelativisticGraphConv(
+            8, 16, max_relative_velocity=0.5, normalize=False
+        )
         torch.manual_seed(0)
-        conv_norm = RelativisticGraphConv(8, 16, max_relative_velocity=0.5, normalize=True)
+        conv_norm = RelativisticGraphConv(
+            8, 16, max_relative_velocity=0.5, normalize=True
+        )
         out_no = conv_no_norm(x, edge_index)
         out_yes = conv_norm(x, edge_index)
         # Normalization adds self-loops and rescales — output shapes match
@@ -120,9 +125,7 @@ class TestRelativisticGraphConv:
 class TestMultiObserverGNN:
     def test_forward_shape(self):
         torch.manual_seed(0)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long
-        )
+        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
         x = torch.randn(4, 16)
         model = MultiObserverGNN(
             feature_dim=16, hidden_dim=32, output_dim=8, num_observers=4
@@ -132,9 +135,7 @@ class TestMultiObserverGNN:
 
     def test_backward_produces_finite_grads(self):
         torch.manual_seed(0)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long
-        )
+        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
         x = torch.randn(4, 16)
         model = MultiObserverGNN(
             feature_dim=16, hidden_dim=32, output_dim=8, num_observers=4
@@ -185,7 +186,10 @@ class TestRelativisticLIFNeuron:
         spikes_in = torch.ones(batch_size, input_size) * 2.0  # strong input
         spikes_out, _ = neuron(spikes_in, state)
         unique_values = set(spikes_out.unique().tolist())
-        assert unique_values <= {0.0, 1.0}, f"expected binary spikes, got {unique_values}"
+        assert unique_values <= {
+            0.0,
+            1.0,
+        }, f"expected binary spikes, got {unique_values}"
 
 
 class TestTerrellPenroseSNN:

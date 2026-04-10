@@ -102,12 +102,17 @@ class RelativisticGraphConv(MessagePassing):
         edge_weight = None
         if self.normalize:
             edge_index, edge_weight = gcn_norm(
-                edge_index, edge_weight=None, num_nodes=x.size(0),
+                edge_index,
+                edge_weight=None,
+                num_nodes=x.size(0),
                 add_self_loops=True,
             )
 
         return self.propagate(
-            edge_index, x=x, position=position, edge_attr=edge_attr,
+            edge_index,
+            x=x,
+            position=position,
+            edge_attr=edge_attr,
             edge_weight=edge_weight,
         )
 
@@ -191,6 +196,7 @@ class RelativisticGraphConv(MessagePassing):
         )
 
         return aberration_factor
+
 
 class MultiObserverGNN(nn.Module):
     """

@@ -290,14 +290,14 @@ class TerrellPenroseSNN(nn.Module):
             input_membrane = torch.zeros(batch_size, self.input_size, device=device)
             hidden_membrane = torch.zeros(batch_size, self.hidden_size, device=device)
         else:
-            (input_membrane, _) = initial_state.get(
+            input_membrane, _ = initial_state.get(
                 "input_layer",
                 (
                     torch.zeros(batch_size, self.input_size, device=device),
                     torch.zeros(batch_size, self.input_size, device=device),
                 ),
             )
-            (hidden_membrane, _) = initial_state.get(
+            hidden_membrane, _ = initial_state.get(
                 "hidden_layer",
                 (
                     torch.zeros(batch_size, self.hidden_size, device=device),
